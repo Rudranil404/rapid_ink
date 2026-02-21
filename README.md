@@ -1,5 +1,5 @@
 <p align="center">
-<img src="public/favicon.ico" width="200" alt="Rapid Ink Logo">
+<img src="public/logo.png" width="200" alt="Rapid Ink Logo">
 </p>
 
 <p align="center">
@@ -43,6 +43,7 @@ git clone [https://github.com/yourusername/rapid-ink.git](https://github.com/you
 cd rapid-ink
 
 
+
 Install Dependencies:
 Install the necessary PHP and Node packages:
 
@@ -51,11 +52,13 @@ npm install
 npm run build
 
 
+
 Environment Setup:
 Create your environment file and generate an application key:
 
 cp .env.example .env
 php artisan key:generate
+
 
 
 Make sure to update your .env file with your local MySQL database credentials (e.g., DB_DATABASE=rapid_ink_db).
@@ -67,9 +70,11 @@ php artisan migrate
 php artisan storage:link
 
 
+
 Launch the Application:
 
 php artisan serve
+
 
 
 Visit http://localhost:8000 in your browser to view the storefront.
