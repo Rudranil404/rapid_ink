@@ -1,20 +1,29 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Storefront
+Route::get('/', [ProductController::class, 'index']);
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
+// Auth Routes (Handled by Breeze)
 require __DIR__.'/auth.php';
+
+// Admin CMS - Protected by 'auth' and our custom 'admin' middleware
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [ProductController::class, 'adminIndex'])->name('admin.dashboard');
+    Route::post('/products', [ProductController::class, 'store'])->name('admin.products.store');
+});
+Route::get('/admin', function () {
+    return redirect()->route('admin.dashboard');
+});
+
+// The route Breeze looks for after login
+Route::get('/dashboard', function () {
+    // If the user is an admin, send them to the Admin CMS
+    if (auth()->user()->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+    
+    // If it's a normal customer, send them back to the storefront
+    return redirect('/');
+})->middleware(['auth'])->name('dashboard');

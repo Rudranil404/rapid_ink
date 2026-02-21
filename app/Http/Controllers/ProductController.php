@@ -14,11 +14,17 @@ class ProductController extends Controller {
     }
 
     // ADMIN: List Products
-    public function adminIndex() {
-        $products = Product::all();
-        return view('admin.products.index', compact('products'));
+    /**
+     * Display the Admin CMS product list.
+     */
+    public function adminIndex()
+    {
+        $products = \App\Models\Product::all();
+        
+        // Fix: Change this from 'admin.products.index' to 'admin.dashboard'
+        return view('admin.dashboard', compact('products'));
     }
-
+    
     // ADMIN: Store Product
     public function store(Request $request) {
         $request->validate(['name' => 'required', 'price' => 'required|numeric']);

@@ -10,13 +10,15 @@ class AdminMiddleware
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next) {
+    public function handle(Request $request, Closure $next): Response
+    {
+        // Check if the user is logged in AND has the 'admin' role
         if (auth()->check() && auth()->user()->role === 'admin') {
-            return $next($request);
+            return $next($request); // Let them pass
         }
-        return redirect('/')->with('error', 'Access Denied.');
+
+        // If they are not an admin, kick them back to the storefront
+        return redirect('/')->with('error', 'You do not have admin access.');
     }
 }
