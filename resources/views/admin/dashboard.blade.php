@@ -46,26 +46,26 @@
             height: var(--topbar-height);
             display: flex;
             align-items: center;
-            justify-content: flex-start; /* Lock to flex-start to prevent snapping */
-            padding-left: 12px; /* Centers the 55px logo inside the 80px collapsed width */ 
+            justify-content: flex-start;
+            padding-left: 12px;
             border-bottom: 1px solid var(--border-color);
             text-decoration: none;
             transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
         }
         .sidebar:hover .sidebar-brand {
-            padding-left: 24px; /* Restore padding smoothly on hover */
+            padding-left: 24px;
         }
         .sidebar-brand img {
-            width: 55px; /* Shrink width to fit entire logo in collapsed sidebar */
+            width: 55px;
             height: auto;
             max-height: 40px;
             object-fit: contain;
-            object-position: left center; /* Anchor scaling to the left */
+            object-position: left center;
             transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .sidebar:hover .sidebar-brand img {
-            width: 180px; /* Expand to original readable size */
+            width: 180px;
         }
         .nav-item-link {
             display: flex;
@@ -114,7 +114,6 @@
             flex-direction: column;
             transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        /* Shift main content when sidebar is hovered */
         .sidebar:hover ~ .main-content {
             margin-left: var(--sidebar-width-expanded);
         }
@@ -232,13 +231,13 @@
             <img src="{{ asset('images/logo.png') }}" alt="Rapid Ink Logo">
         </a>
         <div class="py-4 d-flex flex-column gap-1">
-            <a href="#" class="nav-item-link active">
+            <a href="{{ route('admin.dashboard') }}" class="nav-item-link active">
                 <div class="nav-icon-wrap"><iconify-icon icon="lucide:layout-dashboard" style="font-size: 18px;"></iconify-icon></div>
                 <span class="nav-text">Dashboard</span>
             </a>
-            <a href="#" class="nav-item-link">
+            <a href="{{ url('/admin/products') }}" class="nav-item-link">
                 <div class="nav-icon-wrap"><iconify-icon icon="lucide:shopping-bag" style="font-size: 18px;"></iconify-icon></div>
-                <span class="nav-text">Products</span>
+                <span class="nav-text">Add Products</span>
             </a>
             <a href="#" class="nav-item-link">
                 <div class="nav-icon-wrap"><iconify-icon icon="lucide:shopping-cart" style="font-size: 18px;"></iconify-icon></div>
@@ -270,16 +269,15 @@
         <!-- Top Navigation -->
         <header class="topbar">
             <div class="d-flex align-items-center gap-3">
-                <!-- Logo in the horizontal Nav-bar (Clickable) -->
-                <!-- <a href="/">
-                    <img src="{{ asset('images/logo.png') }}" alt="Rapid Ink Logo" style="max-height: 45px; width: auto; object-fit: contain;">
-                </a> -->
-                <h5 class="mb-0 fw-bold  text-muted d-none d-sm-block">Dashboard</h5>
+                <h5 class="mb-0 fw-bold text-muted d-none d-sm-block">Dashboard</h5>
             </div>
             <div class="d-flex align-items-center gap-3">
                 <div class="text-end d-none d-md-block">
-                    <div class="fw-bold" style="font-size: 14px;">Admin User</div>
-                    <div class="text-muted" style="font-size: 12px;">Store Manager</div>
+                    <!-- Dynamically pull the logged in Admin's name -->
+                    <div class="fw-bold" style="font-size: 14px;">{{ auth()->user()->name ?? 'Admin User' }}</div>
+                    <div class="text-muted text-uppercase" style="font-size: 11px; letter-spacing: 0.05em; font-weight: 700;">
+                        {{ auth()->user()->role ?? 'Store Manager' }}
+                    </div>
                 </div>
                 <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #f3f4f6; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color);">
                     <iconify-icon icon="lucide:user" style="font-size: 20px;"></iconify-icon>
@@ -289,6 +287,14 @@
 
         <!-- Content Area -->
         <div class="content-pad">
+            <!-- Success Message Notification -->
+            @if(session('success'))
+                <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center gap-2">
+                    <iconify-icon icon="lucide:check-circle-2" style="font-size: 20px;"></iconify-icon>
+                    {{ session('success') }}
+                </div>
+            @endif
+
             <!-- Stats Row -->
             <div class="row g-4 mb-5">
                 <div class="col-12 col-md-6 col-lg-3">
@@ -314,7 +320,7 @@
                         <div class="stat-icon"><iconify-icon icon="lucide:shirt"></iconify-icon></div>
                         <div>
                             <div class="stat-label">Total Products</div>
-                            <div class="stat-value">124</div>
+                            <div class="stat-value">{{ $products->count() ?? 124 }}</div>
                         </div>
                     </div>
                 </div>
@@ -332,8 +338,7 @@
             <!-- Products Table Section -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h5 class="fw-bold mb-0">Recent Products</h5>
-                <!-- Example Add Product button targeting a modal or new route -->
-                <a href="#" class="btn btn-brand d-flex align-items-center gap-2">
+                <a href="{{ route('admin.products.create') }}" class="btn btn-brand d-flex align-items-center gap-2">
                     <iconify-icon icon="lucide:plus"></iconify-icon> Add New Product
                 </a>
             </div>
@@ -343,68 +348,61 @@
                     <thead>
                         <tr>
                             <th>Product</th>
-                            <th>Category</th>
+                            <th>Date Added</th>
                             <th>Price</th>
                             <th>Status</th>
                             <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Example Static Data (Replace with your Laravel $products loop) -->
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="product-img"></div> <!-- Placeholder for actual image -->
-                                    <div>
-                                        <div class="fw-bold text-dark">Thunder Glyph Tee</div>
-                                        <div class="text-muted small">ID: #PRD-001</div>
+                        @forelse($products as $product)
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        @if($product->image)
+                                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="product-img">
+                                        @else
+                                            <div class="product-img d-flex align-items-center justify-content-center text-muted">
+                                                <iconify-icon icon="lucide:image"></iconify-icon>
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ $product->name }}</div>
+                                            <div class="text-muted small">ID: #PRD-{{ str_pad($product->id, 4, '0', STR_PAD_LEFT) }}</div>
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
-                            <td>Oversized</td>
-                            <td class="fw-bold">$45.00</td>
-                            <td><span class="badge-trending">Trending</span></td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-light border me-1"><iconify-icon icon="lucide:edit-2"></iconify-icon></button>
-                                <button class="btn btn-sm btn-light border text-danger"><iconify-icon icon="lucide:trash-2"></iconify-icon></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="product-img"></div>
-                                    <div>
-                                        <div class="fw-bold text-dark">Voltage Leap Tee</div>
-                                        <div class="text-muted small">ID: #PRD-002</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Graphic Packs</td>
-                            <td class="fw-bold">$52.00</td>
-                            <td><span class="badge bg-light text-dark border">Standard</span></td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-light border me-1"><iconify-icon icon="lucide:edit-2"></iconify-icon></button>
-                                <button class="btn btn-sm btn-light border text-danger"><iconify-icon icon="lucide:trash-2"></iconify-icon></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="product-img"></div>
-                                    <div>
-                                        <div class="fw-bold text-dark">Brush Chaos Tee</div>
-                                        <div class="text-muted small">ID: #PRD-003</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>All Tees</td>
-                            <td class="fw-bold">$40.00</td>
-                            <td><span class="badge bg-light text-dark border">Standard</span></td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-light border me-1"><iconify-icon icon="lucide:edit-2"></iconify-icon></button>
-                                <button class="btn btn-sm btn-light border text-danger"><iconify-icon icon="lucide:trash-2"></iconify-icon></button>
-                            </td>
-                        </tr>
+                                </td>
+                                <td>{{ $product->created_at->format('M d, Y') }}</td>
+                                <td class="fw-bold">${{ number_format($product->price, 2) }}</td>
+                                <td>
+                                    @if($product->is_trending)
+                                        <span class="badge-trending">Trending</span>
+                                    @else
+                                        <span class="badge bg-light text-dark border">Standard</span>
+                                    @endif
+                                </td>
+                                <td class="text-end">
+                                    <a href="#" class="btn btn-sm btn-light border me-1"><iconify-icon icon="lucide:edit-2"></iconify-icon></a>
+                                    
+                                    <!-- FIX IS HERE: The action attribute properly sends DELETE request to the destroy route! -->
+                                    <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-light border text-danger" onclick="return confirm('Are you sure you want to delete this product?')">
+                                            <iconify-icon icon="lucide:trash-2"></iconify-icon>
+                                        </button>
+                                    </form>
+
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <iconify-icon icon="lucide:package-open" style="font-size: 32px; margin-bottom: 10px;"></iconify-icon>
+                                    <p class="mb-0">No products found. Start by adding your first product!</p>
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -412,7 +410,7 @@
         </div>
     </main>
 
-    <!-- Bootstrap JS (Optional if you need modals/dropdowns later) -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
