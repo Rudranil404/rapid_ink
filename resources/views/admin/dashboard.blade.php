@@ -10,7 +10,8 @@
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     <style>
         :root {
-            --sidebar-width: 260px;
+            --sidebar-width-collapsed: 80px;
+            --sidebar-width-expanded: 260px;
             --topbar-height: 70px;
             --brand-color: #000000;
             --bg-light: #f3f4f6;
@@ -23,7 +24,7 @@
         }
         /* Sidebar Styles */
         .sidebar {
-            width: var(--sidebar-width);
+            width: var(--sidebar-width-collapsed);
             background-color: #ffffff;
             border-right: 1px solid var(--border-color);
             position: fixed;
@@ -33,42 +34,89 @@
             z-index: 1000;
             display: flex;
             flex-direction: column;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+            overflow-x: hidden;
+            white-space: nowrap;
+        }
+        .sidebar:hover {
+            width: var(--sidebar-width-expanded);
+            box-shadow: 4px 0 24px rgba(0,0,0,0.08);
         }
         .sidebar-brand {
             height: var(--topbar-height);
             display: flex;
             align-items: center;
-            padding: 0 24px;
-            font-size: 22px;
-            font-weight: 900;
-            letter-spacing: -0.04em;
-            text-transform: uppercase;
+            justify-content: flex-start; /* Lock to flex-start to prevent snapping */
+            padding-left: 12px; /* Centers the 55px logo inside the 80px collapsed width */ 
             border-bottom: 1px solid var(--border-color);
-            color: var(--brand-color);
             text-decoration: none;
+            transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        .sidebar:hover .sidebar-brand {
+            padding-left: 24px; /* Restore padding smoothly on hover */
+        }
+        .sidebar-brand img {
+            width: 55px; /* Shrink width to fit entire logo in collapsed sidebar */
+            height: auto;
+            max-height: 40px;
+            object-fit: contain;
+            object-position: left center; /* Anchor scaling to the left */
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar:hover .sidebar-brand img {
+            width: 180px; /* Expand to original readable size */
         }
         .nav-item-link {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 24px;
+            padding: 12px 0;
             color: #4b5563;
             text-decoration: none;
             font-weight: 600;
             font-size: 14px;
             transition: all 0.2s;
+            min-width: var(--sidebar-width-expanded);
+            border-right: 3px solid transparent;
         }
         .nav-item-link:hover, .nav-item-link.active {
             background-color: #f9fafb;
             color: var(--brand-color);
-            border-right: 3px solid var(--brand-color);
+            border-right-color: var(--brand-color);
+        }
+        .nav-icon-wrap {
+            width: var(--sidebar-width-collapsed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .nav-text {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-10px);
+            transition: all 0.2s ease;
+        }
+        .sidebar:hover .nav-text {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+            transition-delay: 0.1s;
+        }
+        .sidebar-bottom {
+            min-width: var(--sidebar-width-expanded);
         }
         /* Main Content Styles */
         .main-content {
-            margin-left: var(--sidebar-width);
+            margin-left: var(--sidebar-width-collapsed);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* Shift main content when sidebar is hovered */
+        .sidebar:hover ~ .main-content {
+            margin-left: var(--sidebar-width-expanded);
         }
         .topbar {
             height: var(--topbar-height);
@@ -181,31 +229,37 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <a href="/" class="sidebar-brand">
-            RAPID<iconify-icon icon="lucide:zap" style="margin: 0 4px;"></iconify-icon>INK
+            <img src="{{ asset('images/logo.png') }}" alt="Rapid Ink Logo">
         </a>
         <div class="py-4 d-flex flex-column gap-1">
             <a href="#" class="nav-item-link active">
-                <iconify-icon icon="lucide:layout-dashboard" style="font-size: 18px;"></iconify-icon> Dashboard
+                <div class="nav-icon-wrap"><iconify-icon icon="lucide:layout-dashboard" style="font-size: 18px;"></iconify-icon></div>
+                <span class="nav-text">Dashboard</span>
             </a>
             <a href="#" class="nav-item-link">
-                <iconify-icon icon="lucide:shopping-bag" style="font-size: 18px;"></iconify-icon> Products
+                <div class="nav-icon-wrap"><iconify-icon icon="lucide:shopping-bag" style="font-size: 18px;"></iconify-icon></div>
+                <span class="nav-text">Products</span>
             </a>
             <a href="#" class="nav-item-link">
-                <iconify-icon icon="lucide:shopping-cart" style="font-size: 18px;"></iconify-icon> Orders
+                <div class="nav-icon-wrap"><iconify-icon icon="lucide:shopping-cart" style="font-size: 18px;"></iconify-icon></div>
+                <span class="nav-text">Orders</span>
             </a>
             <a href="#" class="nav-item-link">
-                <iconify-icon icon="lucide:users" style="font-size: 18px;"></iconify-icon> Customers
+                <div class="nav-icon-wrap"><iconify-icon icon="lucide:users" style="font-size: 18px;"></iconify-icon></div>
+                <span class="nav-text">Customers</span>
             </a>
             <a href="#" class="nav-item-link">
-                <iconify-icon icon="lucide:settings" style="font-size: 18px;"></iconify-icon> Settings
+                <div class="nav-icon-wrap"><iconify-icon icon="lucide:settings" style="font-size: 18px;"></iconify-icon></div>
+                <span class="nav-text">Settings</span>
             </a>
         </div>
         
-        <div class="mt-auto p-4 border-top">
+        <div class="sidebar-bottom mt-auto border-top py-4">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="nav-item-link w-100 bg-transparent border-0 text-danger" style="padding: 0;">
-                    <iconify-icon icon="lucide:log-out" style="font-size: 18px;"></iconify-icon> Logout
+                <button type="submit" class="nav-item-link w-100 bg-transparent text-danger text-start" style="border-top: none; border-left: none; border-bottom: none;">
+                    <div class="nav-icon-wrap"><iconify-icon icon="lucide:log-out" style="font-size: 18px;"></iconify-icon></div>
+                    <span class="nav-text">Logout</span>
                 </button>
             </form>
         </div>
@@ -215,8 +269,12 @@
     <main class="main-content">
         <!-- Top Navigation -->
         <header class="topbar">
-            <div>
-                <h5 class="mb-0 fw-bold">Overview</h5>
+            <div class="d-flex align-items-center gap-3">
+                <!-- Logo in the horizontal Nav-bar (Clickable) -->
+                <!-- <a href="/">
+                    <img src="{{ asset('images/logo.png') }}" alt="Rapid Ink Logo" style="max-height: 45px; width: auto; object-fit: contain;">
+                </a> -->
+                <h5 class="mb-0 fw-bold  text-muted d-none d-sm-block">Dashboard</h5>
             </div>
             <div class="d-flex align-items-center gap-3">
                 <div class="text-end d-none d-md-block">

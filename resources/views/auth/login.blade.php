@@ -10,7 +10,7 @@
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     <style>
         body {
-            background-color: #f3f4f6; /* Light gray background */
+            background-color: #FFFAD0; /* Light gray background */
             color: #111827; /* Dark text */
             height: 100vh;
             display: flex;
@@ -19,22 +19,22 @@
             font-family: 'Inter', system-ui, sans-serif;
         }
         .login-card {
-            background-color: #ffffff;
-            border: 1px solid #e5e7eb;
+            background-color: #ffffff41;
+            border: 1px solid #e5e7eb56;
             border-radius: 12px;
             padding: 40px;
             width: 100%;
             max-width: 420px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); /* Soft shadow */
+            box-shadow: 0 10px 25px rgb(0, 0, 0); /* Soft shadow */
         }
         .form-control {
-            background-color: #f9fafb;
-            border: 1px solid #d1d5db;
+            background-color: #f9fafb67;
+            border: 1px solid #d1d5db54;
             color: #111827;
             padding: 12px 16px;
         }
         .form-control:focus {
-            background-color: #ffffff;
+            background-color: #ffffff48;
             border-color: #000000;
             color: #111827;
             box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
@@ -55,19 +55,46 @@
             color: #ffffff;
         }
         .brand-logo {
-            font-size: 28px;
-            font-weight: 900;
-            letter-spacing: -0.04em;
-            text-transform: uppercase;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
+        }
+        .brand-logo img {
+            max-height: 100px;
+            width: auto;
+            object-fit: contain;
+        }
+        .back-link {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .back-link:hover {
             color: #000000;
         }
-        .brand-icon {
-            color: #000000; /* Replaced yellow with solid black for light theme */
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+        .password-toggle:hover {
+            color: #111827;
         }
     </style>
 </head>
@@ -75,7 +102,7 @@
 
     <div class="login-card">
         <div class="brand-logo">
-            RAPID<iconify-icon icon="lucide:zap" class="brand-icon" style="font-size: 28px;"></iconify-icon>INK
+            <img src="{{ asset('images/logo.png') }}" alt="Rapid Ink Logo">
         </div>
         <h4 class="text-center mb-4" style="font-weight: 700;">Command Center</h4>
 
@@ -89,7 +116,12 @@
 
             <div class="mb-4">
                 <label class="form-label text-muted small text-uppercase fw-bold">Password</label>
-                <input type="password" name="password" class="form-control" required placeholder="••••••••">
+                <div class="position-relative">
+                    <input type="password" name="password" id="password" class="form-control pe-5" required placeholder="••••••••">
+                    <button type="button" id="togglePassword" class="password-toggle" tabindex="-1">
+                        <iconify-icon icon="lucide:eye" style="font-size: 18px;"></iconify-icon>
+                    </button>
+                </div>
             </div>
 
             <div class="mb-4 form-check">
@@ -97,11 +129,36 @@
                 <label class="form-check-label text-muted small fw-medium" for="remember">Keep me logged in</label>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+            <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center mb-4">
                 <iconify-icon icon="lucide:shield-check" class="me-2" style="font-size: 18px;"></iconify-icon> Authenticate
             </button>
+            
+            <!-- New Back to Storefront Button -->
+            <div class="text-center">
+                <a href="/" class="back-link">
+                    <iconify-icon icon="lucide:arrow-left" style="font-size: 16px;"></iconify-icon> Return to Storefront
+                </a>
+            </div>
         </form>
     </div>
 
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+
+        togglePassword.addEventListener('click', function (e) {
+            // Toggle the type attribute
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            
+            // Toggle the eye icon
+            const icon = this.querySelector('iconify-icon');
+            if (type === 'password') {
+                icon.setAttribute('icon', 'lucide:eye');
+            } else {
+                icon.setAttribute('icon', 'lucide:eye-off');
+            }
+        });
+    </script>
 </body>
 </html>
