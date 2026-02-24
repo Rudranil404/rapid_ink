@@ -319,19 +319,24 @@
         @php
             $cats = [];
             foreach($settings as $key => $val) {
-                if (preg_match('/^cat(\d+)_title$/', $key, $matches)) {
+                // Now matching ANY category key (title, image, or link)
+                if (preg_match('/^cat(\d+)_/', $key, $matches)) {
                     $idx = (int)$matches[1];
-                    $cats[$idx] = [
-                        'title' => $settings["cat{$idx}_title"] ?? '',
-                        'image' => $settings["cat{$idx}_image"] ?? null,
-                        'link'  => $settings["cat{$idx}_link"] ?? '#',
-                    ];
+                    
+                    // Create the category array if it doesn't exist yet
+                    if (!isset($cats[$idx])) {
+                        $cats[$idx] = [
+                            'title' => $settings["cat{$idx}_title"] ?? 'New Category',
+                            'image' => $settings["cat{$idx}_image"] ?? null,
+                            'link'  => $settings["cat{$idx}_link"] ?? '#',
+                        ];
+                    }
                 }
             }
             ksort($cats);
             $cats = array_values($cats);
             
-            // Default fallbacks if empty
+            // Default fallbacks if database is completely empty
             if (empty($cats)) {
                 $cats = [
                     ['title' => 'Heavyweight Tees', 'image' => null, 'link' => '#'],

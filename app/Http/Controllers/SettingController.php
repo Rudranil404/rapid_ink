@@ -17,9 +17,6 @@ class SettingController extends Controller
         return view('admin.settings.homepage', compact('settings'));
     }
 
-    // Save the form data
-   // Save the form data
-   // Save the form data
     public function updateHomepage(Request $request)
     {
         $data = $request->except(['_token']);
@@ -32,7 +29,7 @@ class SettingController extends Controller
                 $keysToDelete = \App\Models\Setting::where('key', 'like', "slide{$slideId}\_%")->get();
                 foreach ($keysToDelete as $setting) {
                     if (str_contains($setting->key, '_image') && $setting->value) {
-                        Storage::disk('public')->delete($setting->value);
+                        \Illuminate\Support\Facades\Storage::disk('public')->delete($setting->value);
                     }
                     $setting->delete();
                 }
@@ -48,7 +45,7 @@ class SettingController extends Controller
                 $keysToDelete = \App\Models\Setting::where('key', 'like', "cat{$catId}\_%")->get();
                 foreach ($keysToDelete as $setting) {
                     if (str_contains($setting->key, '_image') && $setting->value) {
-                        Storage::disk('public')->delete($setting->value);
+                        \Illuminate\Support\Facades\Storage::disk('public')->delete($setting->value);
                     }
                     $setting->delete();
                 }
@@ -61,14 +58,17 @@ class SettingController extends Controller
             if ($request->hasFile($key)) {
                 $oldSetting = \App\Models\Setting::where('key', $key)->first();
                 if ($oldSetting && $oldSetting->value) {
-                    Storage::disk('public')->delete($oldSetting->value);
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($oldSetting->value);
                 }
                 $path = $request->file($key)->store('homepage', 'public');
                 \App\Models\Setting::updateOrCreate(['key' => $key], ['value' => $path]);
             } else {
-                if ($value !== null) {
-                    \App\Models\Setting::updateOrCreate(['key' => $key], ['value' => $value]);
-                }
+                // FIX: If a text field is left empty, save it as an empty string instead of ignoring it.
+                // This ensures the database knows the category/slide block exists!
+                \App\Models\Setting::updateOrCreate(
+                    ['key' => $key], 
+                    ['value' => $value ?? ''] 
+                );
             }
         }
 
