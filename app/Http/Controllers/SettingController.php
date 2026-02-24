@@ -18,26 +18,57 @@ class SettingController extends Controller
     }
 
     // Save the form data
+   // Save the form data
+   // Save the form data
     public function updateHomepage(Request $request)
     {
         $data = $request->except(['_token']);
 
+        // 1. Handle Slide Deletions
+        if (!empty($data['deleted_slides'])) {
+            $deletedSlides = explode(',', $data['deleted_slides']);
+            foreach ($deletedSlides as $slideId) {
+                if (empty($slideId)) continue;
+                $keysToDelete = \App\Models\Setting::where('key', 'like', "slide{$slideId}\_%")->get();
+                foreach ($keysToDelete as $setting) {
+                    if (str_contains($setting->key, '_image') && $setting->value) {
+                        Storage::disk('public')->delete($setting->value);
+                    }
+                    $setting->delete();
+                }
+            }
+        }
+        unset($data['deleted_slides']);
+
+        // 2. Handle Category Deletions
+        if (!empty($data['deleted_categories'])) {
+            $deletedCats = explode(',', $data['deleted_categories']);
+            foreach ($deletedCats as $catId) {
+                if (empty($catId)) continue;
+                $keysToDelete = \App\Models\Setting::where('key', 'like', "cat{$catId}\_%")->get();
+                foreach ($keysToDelete as $setting) {
+                    if (str_contains($setting->key, '_image') && $setting->value) {
+                        Storage::disk('public')->delete($setting->value);
+                    }
+                    $setting->delete();
+                }
+            }
+        }
+        unset($data['deleted_categories']);
+
+        // 3. Process Standard Updates & New Uploads
         foreach ($data as $key => $value) {
-            // Handle Image Uploads dynamically
             if ($request->hasFile($key)) {
-                // Delete old image if it exists
-                $oldSetting = Setting::where('key', $key)->first();
+                $oldSetting = \App\Models\Setting::where('key', $key)->first();
                 if ($oldSetting && $oldSetting->value) {
                     Storage::disk('public')->delete($oldSetting->value);
                 }
-                
-                // Store new image
                 $path = $request->file($key)->store('homepage', 'public');
-                Setting::updateOrCreate(['key' => $key], ['value' => $path]);
-            } 
-            // Handle Text/Standard Inputs
-            else {
-                Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+                \App\Models\Setting::updateOrCreate(['key' => $key], ['value' => $path]);
+            } else {
+                if ($value !== null) {
+                    \App\Models\Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+                }
             }
         }
 

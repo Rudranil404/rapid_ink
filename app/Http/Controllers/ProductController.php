@@ -10,10 +10,19 @@ use Illuminate\Support\Str;
 class ProductController extends Controller
 {
     // Storefront index
+    // Make sure to add this at the top of your file if it's not there:
+    // use App\Models\Setting;
+
+    // Storefront index
     public function index()
     {
-        $products = Product::where('status', 'active')->get();
-        return view('welcome', compact('products'));
+        // Fetch active products
+        $products = Product::where('status', 'active')->latest()->get();
+        
+        // Fetch all homepage settings into a simple key-value array
+        $settings = \App\Models\Setting::pluck('value', 'key')->toArray();
+        
+        return view('welcome', compact('products', 'settings'));
     }
 
     // Admin Dashboard list

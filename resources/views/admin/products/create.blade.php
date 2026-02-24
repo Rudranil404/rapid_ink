@@ -25,7 +25,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center gap-3">
-            <a href="{{ route('admin.dashboard') }}" class="btn btn-sm btn-light border p-2" title="Go Back">
+            <a href="{{ route('admin.products.index') }}" class="btn btn-sm btn-light border p-2" title="Go Back">
                 <iconify-icon icon="lucide:arrow-left" style="font-size: 18px;"></iconify-icon>
             </a>
             <h4 class="fw-bold mb-0">Add New Product</h4>
