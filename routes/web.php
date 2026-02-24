@@ -2,10 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SettingController;
 
 // Storefront
 Route::get('/', [ProductController::class, 'index']);
-
+Route::get('/', [ProductController::class, 'index'])->name('home');
 // Auth Routes (Handled by Breeze)
 require __DIR__.'/auth.php';
 
@@ -13,7 +14,8 @@ require __DIR__.'/auth.php';
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     // Dashboard
     Route::get('/dashboard', [ProductController::class, 'adminIndex'])->name('admin.dashboard');
-    
+    Route::get('/homepage-settings', [SettingController::class, 'editHomepage'])->name('admin.settings.homepage');
+    Route::post('/homepage-settings', [SettingController::class, 'updateHomepage'])->name('admin.settings.homepage.update');
     // Product Management
     // Updated this route to point to the 'create' method so it loads the Add Product page
     Route::get('/products', [ProductController::class, 'create'])->name('admin.products.index');

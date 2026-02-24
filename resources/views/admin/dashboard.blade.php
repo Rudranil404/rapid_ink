@@ -235,9 +235,16 @@
                 <div class="nav-icon-wrap"><iconify-icon icon="lucide:layout-dashboard" style="font-size: 18px;"></iconify-icon></div>
                 <span class="nav-text">Dashboard</span>
             </a>
+            
+            <!-- NEW HOME PAGE SETTINGS LINK -->
+            <a href="{{ url('/admin/homepage-settings') }}" class="nav-item-link">
+                <div class="nav-icon-wrap"><iconify-icon icon="lucide:home" style="font-size: 18px;"></iconify-icon></div>
+                <span class="nav-text">Home Page Editor</span>
+            </a>
+            
             <a href="{{ url('/admin/products') }}" class="nav-item-link">
                 <div class="nav-icon-wrap"><iconify-icon icon="lucide:shopping-bag" style="font-size: 18px;"></iconify-icon></div>
-                <span class="nav-text">Add Products</span>
+                <span class="nav-text">Products</span>
             </a>
             <a href="#" class="nav-item-link">
                 <div class="nav-icon-wrap"><iconify-icon icon="lucide:shopping-cart" style="font-size: 18px;"></iconify-icon></div>
