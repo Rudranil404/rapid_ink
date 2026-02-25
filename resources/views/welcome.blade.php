@@ -31,6 +31,8 @@
             .section-padding { padding: 64px 0; }
             .site-logo { height: 32px; }
             .announcement-bar { font-size: 10px; }
+            /* Add padding to body so content isn't hidden behind the new bottom nav */
+            body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); } 
         }
     </style>
 
@@ -84,12 +86,23 @@
         .mobile-menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
         .mobile-nav-links { display: flex; flex-direction: column; gap: 32px; font-size: 24px; font-weight: 800; text-transform: uppercase; }
         .close-menu-btn { background: none; border: none; color: var(--foreground); cursor: pointer; padding: 0; display: flex; }
+
+        /* Bottom App Navigation for Mobile */
+        .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        [data-theme="dark"] .mobile-bottom-nav { background-color: rgba(0, 0, 0, 0.95); }
+        .mobile-bottom-nav-inner { display: flex; justify-content: space-around; align-items: center; height: 64px; }
+        .mobile-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--muted-foreground); text-decoration: none; width: 100%; height: 100%; transition: color 0.2s; }
+        .mobile-nav-item.active { color: var(--foreground); }
+        .mobile-nav-item span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        .mobile-nav-icon { font-size: 22px; position: relative; }
+        .mobile-bottom-cart-badge { position: absolute; top: -4px; right: -8px; background-color: #ff4d4f; color: white; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; }
         
         @media (max-width: 768px) {
             .d-none-mobile { display: none !important; }
             .mobile-menu-btn { display: flex; }
             .nav-actions { gap: 16px; }
             .navbar { height: 70px; }
+            .mobile-bottom-nav { display: block; }
         }
     </style>
 
@@ -225,9 +238,9 @@
         :root { --background: #ffffff; --foreground: #000000; --border: #00000014; --primary: #000000; --primary-foreground: #ffffff; --secondary: #f5f5f5; --muted-foreground: #888888; --card: #ffffff; --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px; --radius-xl: 12px; --font-family-body: 'Inter', sans-serif; }
         [data-theme="dark"] { --background: #000000; --foreground: #ffffff; --border: #ffffff14; --primary: #fff5b8; --primary-foreground: #000000; --secondary: #141414; --muted-foreground: #9b9b9b; --card: #0b0b0b; }
     </style>
-  </head>
+</head>
 
-  <body>
+<body>
     @if(!empty($settings['promo_link']))
         <a href="{{ $settings['promo_link'] }}" class="announcement-bar">
             {{ $settings['promo_text'] ?? '🔥 FREE Worldwide Shipping on Orders Over $75!' }}
@@ -283,7 +296,7 @@
                         <a href="{{ route('login') }}" class="nav-icon"><iconify-icon icon="lucide:user"></iconify-icon></a>
                     @endauth
                 </div>
-                <div class="nav-icon">
+                <div class="nav-icon d-none-mobile">
                     <iconify-icon icon="lucide:shopping-bag"></iconify-icon>
                     <div class="nav-cart-badge">0</div>
                 </div>
@@ -624,6 +637,37 @@
         </footer>
     </main>
 
+    <nav class="mobile-bottom-nav">
+        <div class="mobile-bottom-nav-inner">
+            <a href="/" class="mobile-nav-item active">
+                <iconify-icon icon="lucide:home" class="mobile-nav-icon"></iconify-icon>
+                <span>Home</span>
+            </a>
+            <a href="/products" class="mobile-nav-item">
+                <iconify-icon icon="lucide:layout-grid" class="mobile-nav-icon"></iconify-icon>
+                <span>Shop</span>
+            </a>
+            <a href="#" class="mobile-nav-item">
+                <div class="mobile-nav-icon">
+                    <iconify-icon icon="lucide:shopping-bag"></iconify-icon>
+                    <div class="mobile-bottom-cart-badge">0</div>
+                </div>
+                <span>Cart</span>
+            </a>
+            @auth
+                <a href="{{ route('dashboard') }}" class="mobile-nav-item">
+                    <iconify-icon icon="lucide:user" class="mobile-nav-icon"></iconify-icon>
+                    <span>Profile</span>
+                </a>
+            @else
+                <a href="{{ route('login') }}" class="mobile-nav-item">
+                    <iconify-icon icon="lucide:log-in" class="mobile-nav-icon"></iconify-icon>
+                    <span>Login</span>
+                </a>
+            @endauth
+        </div>
+    </nav>
+
     <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
     <script>
         // Theme Toggle Logic
@@ -661,7 +705,7 @@
             if(menuBtn && closeBtn && mobileMenu) {
                 menuBtn.addEventListener('click', () => {
                     mobileMenu.classList.add('open');
-                    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                    document.body.style.overflow = 'hidden'; 
                 });
 
                 closeBtn.addEventListener('click', () => {
