@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     
     <title>{{ $settings['site_title'] ?? 'Rapid Ink | Premium Streetwear' }}</title>
     <meta name="description" content="{{ $settings['meta_description'] ?? 'Shop the latest premium streetwear and heavyweight tees at Rapid Ink.' }}">
@@ -15,7 +15,7 @@
 
     <style id="base-reset">
         * { box-sizing: border-box; }
-        body { margin: 0; padding: 0; background-color: var(--background); color: var(--foreground); line-height: 1.6; font-family: var(--font-family-body, system-ui, -apple-system, sans-serif); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        body { margin: 0; padding: 0; background-color: var(--background); color: var(--foreground); line-height: 1.6; font-family: var(--font-family-body, system-ui, -apple-system, sans-serif); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overflow-x: hidden; }
         a { text-decoration: none; color: inherit; }
         ul { list-style: none; margin: 0; padding: 0; }
         .container { max-width: 100%; width: 100%; margin: 0 auto; padding: 0 48px; }
@@ -23,8 +23,15 @@
         .site-logo { height: 40px; width: auto; transition: filter 0.3s ease; }
         [data-theme="dark"] .site-logo { filter: invert(1) brightness(2); }
 
-        .announcement-bar { background-color: var(--foreground); color: var(--background); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; text-align: center; height: 40px; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1040; transition: opacity 0.2s; }
+        .announcement-bar { background-color: var(--foreground); color: var(--background); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; text-align: center; height: 40px; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1040; transition: opacity 0.2s; padding: 0 20px;}
         a.announcement-bar:hover { opacity: 0.9; }
+        
+        @media (max-width: 768px) {
+            .container { padding: 0 24px; }
+            .section-padding { padding: 64px 0; }
+            .site-logo { height: 32px; }
+            .announcement-bar { font-size: 10px; }
+        }
     </style>
 
     <style id="typography-styles">
@@ -33,13 +40,22 @@
         .heading-md { font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; margin: 0; }
         .text-muted { color: var(--muted-foreground); font-size: 16px; line-height: 1.6; margin: 0; }
         .text-accent { color: var(--primary); }
+
+        @media (max-width: 768px) {
+            .heading-xl { font-size: 48px; }
+            .heading-lg { font-size: 36px; }
+            .heading-md { font-size: 20px; }
+            .text-muted { font-size: 14px; }
+        }
     </style>
 
     <style id="button-styles">
         .btn { display: inline-flex; align-items: center; justify-content: center; padding: 18px 36px; background-color: var(--primary); color: var(--primary-foreground); font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; border: none; border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap; transition: transform 0.2s, opacity 0.2s; }
         .btn:hover { opacity: 0.9; transform: translateY(-2px); }
         .btn-outline { background-color: transparent; border: 1px solid var(--border); color: var(--foreground); }
-        .btn-link { display: inline-flex; align-items: center; background: none; border: none; padding: 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--foreground); cursor: pointer; }
+        @media (max-width: 768px) {
+            .btn { padding: 14px 28px; font-size: 13px; }
+        }
     </style>
 
     <style id="nav-styles">
@@ -54,13 +70,27 @@
         .nav-link-active::after { content: ""; position: absolute; left: 0; bottom: -8px; width: 100%; height: 2px; background-color: var(--primary); transition: background-color 0.3s; }
         .nav-wrapper:not(.scrolled) .nav-link { color: rgba(255, 255, 255, 0.8); }
         .nav-wrapper:not(.scrolled) .nav-link:hover, .nav-wrapper:not(.scrolled) .nav-link-active { color: #ffffff; }
-        .nav-wrapper:not(.scrolled) .nav-link-active::after { background-color: #ffffff; }
-        .nav-wrapper:not(.scrolled) .nav-icon iconify-icon { color: #ffffff !important; }
+        .nav-wrapper:not(.scrolled) .nav-icon iconify-icon, .nav-wrapper:not(.scrolled) .mobile-menu-btn iconify-icon { color: #ffffff !important; }
         .nav-wrapper:not(.scrolled) .site-logo { filter: brightness(0) invert(1) !important; }
         .nav-actions { display: flex; align-items: center; gap: 24px; }
         .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
         .nav-icon iconify-icon { font-size: 20px; color: var(--foreground); transition: color 0.3s; }
         .nav-cart-badge { position: absolute; top: -6px; right: -6px; background-color: #ff4d4f; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; }
+        
+        /* Mobile Nav Additions */
+        .mobile-menu-btn { display: none; background: none; border: none; padding: 0; cursor: pointer; color: var(--foreground); align-items: center; justify-content: center; }
+        .mobile-menu-overlay { position: fixed; inset: 0; background: var(--background); z-index: 1000; display: flex; flex-direction: column; padding: 24px; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); visibility: hidden; }
+        .mobile-menu-overlay.open { transform: translateX(0); visibility: visible; }
+        .mobile-menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .mobile-nav-links { display: flex; flex-direction: column; gap: 32px; font-size: 24px; font-weight: 800; text-transform: uppercase; }
+        .close-menu-btn { background: none; border: none; color: var(--foreground); cursor: pointer; padding: 0; display: flex; }
+        
+        @media (max-width: 768px) {
+            .d-none-mobile { display: none !important; }
+            .mobile-menu-btn { display: flex; }
+            .nav-actions { gap: 16px; }
+            .navbar { height: 70px; }
+        }
     </style>
 
     <style id="hero-carousel-styles">
@@ -80,36 +110,28 @@
         .carousel-controls { position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); display: flex; justify-content: space-between; padding: 0 40px; z-index: 10; pointer-events: none; }
         .carousel-control { width: 48px; height: 48px; background: rgba(255,255,255,0.1); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; transition: all 0.3s; }
         .carousel-control:hover { background: rgba(255,255,255,0.3); }
-        @media (max-width: 768px) { .hero-headline { font-size: 40px; } .hero-carousel { height: 80vh; } .carousel-controls { display: none; } }
+        
+        @media (max-width: 768px) { 
+            .hero-headline { font-size: 44px; margin-bottom: 16px; } 
+            .hero-subtext { font-size: 15px; margin-bottom: 24px;}
+            .hero-carousel { height: 85vh; min-height: 500px; } 
+            .carousel-controls { display: none; } 
+            .carousel-indicator { width: 30px; }
+        }
     </style>
 
     <style id="trending-grid-styles">
         .trending-grid-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; }
         
-        /* Marquee Container Styles */
         .trending-marquee-wrapper { width: 100%; overflow: hidden; position: relative; padding: 10px 0; }
-        
-        /* The scrolling track */
-        .trending-marquee-track { 
-            display: flex; 
-            gap: 32px; 
-            width: max-content; 
-            /* 40s duration gives a slow, buttery scroll. Adjust time to make it faster/slower */
-            animation: marquee-scroll 40s linear infinite; 
-        }
-        
-        /* Pause the scroll when the user hovers over a product */
-        .trending-marquee-wrapper:hover .trending-marquee-track {
-            animation-play-state: paused;
-        }
+        .trending-marquee-track { display: flex; gap: 32px; width: max-content; animation: marquee-scroll 40s linear infinite; }
+        .trending-marquee-wrapper:hover .trending-marquee-track { animation-play-state: paused; }
 
         @keyframes marquee-scroll {
             0% { transform: translateX(0); }
-            /* Translate by exactly half the width (since we duplicate the items) minus half the gap */
             100% { transform: translateX(calc(-50% - 16px)); } 
         }
 
-        /* Fixed width for cards so they scroll smoothly */
         .trend-card { cursor: pointer; display: block; text-decoration: none; color: inherit; width: 280px; flex-shrink: 0; transition: transform 0.3s; }
         .trend-card:hover { transform: translateY(-8px); }
         .trend-image-wrap { width: 100%; aspect-ratio: 3/4; background-color: var(--secondary); border-radius: var(--radius-md); border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; position: relative; }
@@ -121,34 +143,23 @@
         .badge-trend { position: absolute; top: 12px; left: 12px; background-color: var(--foreground); color: var(--background); font-size: 11px; font-weight: 800; padding: 6px 12px; text-transform: uppercase; z-index: 2; border-radius: var(--radius-sm); }
         
         @media (max-width: 768px) { 
-            .container { padding: 0 24px; } 
-            .trend-card { width: 240px; }
+            .trending-grid-header { flex-direction: column; align-items: flex-start; gap: 16px; margin-bottom: 32px; }
+            .trend-card { width: 220px; }
+            .trending-marquee-track { gap: 16px; }
+            @keyframes marquee-scroll { 100% { transform: translateX(calc(-50% - 8px)); } }
         }
     </style>
 
     <style id="custom-featured-styles">
-        /* Marquee Container Styles for Featured Categories */
         .featured-marquee-wrapper { width: 100%; overflow: hidden; position: relative; padding: 10px 0; }
-        
-        .featured-marquee-track { 
-            display: flex; 
-            gap: 32px; 
-            width: max-content; 
-            /* 45s duration gives a nice, heavy, slow scroll */
-            animation: featured-marquee-scroll 45s linear infinite; 
-        }
-        
-        /* Pause on hover so users can click the links easily */
-        .featured-marquee-wrapper:hover .featured-marquee-track {
-            animation-play-state: paused;
-        }
+        .featured-marquee-track { display: flex; gap: 32px; width: max-content; animation: featured-marquee-scroll 45s linear infinite; }
+        .featured-marquee-wrapper:hover .featured-marquee-track { animation-play-state: paused; }
 
         @keyframes featured-marquee-scroll {
             0% { transform: translateX(0); }
             100% { transform: translateX(calc(-50% - 16px)); } 
         }
 
-        /* Fixed dimensions so cards don't shrink while scrolling */
         .cat-card { background-color: var(--card); border-radius: var(--radius-lg); border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; position: relative; overflow: hidden; height: 450px; width: 380px; flex-shrink: 0; text-decoration: none; }
         .cat-card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 100%); z-index: 1; transition: opacity 0.3s; }
         .cat-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; transition: transform 0.6s ease; }
@@ -159,7 +170,10 @@
         .cat-link { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-top: 12px; display: inline-flex; align-items: center; gap: 4px; }
         
         @media (max-width: 768px) { 
-            .cat-card { width: 300px; height: 380px; padding: 30px; }
+            .cat-card { width: 280px; height: 360px; padding: 30px; }
+            .cat-title { font-size: 22px; }
+            .featured-marquee-track { gap: 16px; }
+            @keyframes featured-marquee-scroll { 100% { transform: translateX(calc(-50% - 8px)); } }
         }
     </style>
 
@@ -168,19 +182,26 @@
         .masonry-grid { column-count: 3; column-gap: 32px; }
         .masonry-item { break-inside: avoid; margin-bottom: 40px; cursor: pointer; }
         .masonry-image-wrap { background-color: var(--secondary); border-radius: var(--radius-md); border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; position: relative; }
-        .masonry-image-wrap img { width: 100%; display: block; object-fit: cover; }
-        .masonry-cart-btn { position: absolute; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: var(--radius-sm); background-color: var(--primary); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); }
+        .masonry-image-wrap img { width: 100%; display: block; object-fit: cover; transition: transform 0.4s ease; }
+        .masonry-item:hover .masonry-image-wrap img { transform: scale(1.05); }
+        .masonry-cart-btn { position: absolute; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: var(--radius-sm); background-color: var(--primary); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); transition: transform 0.2s; }
+        .masonry-cart-btn:hover { transform: scale(1.1); }
         .masonry-info { padding: 0 4px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
         .masonry-text { display: flex; flex-direction: column; gap: 6px; }
         .masonry-name { font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; }
         .masonry-price { font-size: 15px; font-weight: 600; color: var(--muted-foreground); }
-        @media (max-width: 768px) { .masonry-grid { column-count: 2; } }
+        
+        @media (max-width: 768px) { 
+            .masonry-section-header { flex-direction: column; align-items: flex-start; gap: 16px; margin-bottom: 32px; }
+            .masonry-grid { column-count: 2; column-gap: 16px; }
+            .masonry-item { margin-bottom: 24px; }
+            .masonry-name { font-size: 13px; }
+            .masonry-price { font-size: 13px; }
+            .masonry-cart-btn { width: 36px; height: 36px; bottom: 12px; right: 12px; }
+            .masonry-cart-btn iconify-icon { font-size: 16px !important; }
+        }
     </style>
 
-    <style>
-        :root { --background: #ffffff; --foreground: #000000; --border: #00000014; --primary: #000000; --primary-foreground: #ffffff; --secondary: #f5f5f5; --muted-foreground: #888888; --card: #ffffff; --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px; --radius-xl: 12px; --font-family-body: 'Inter', sans-serif; }
-        [data-theme="dark"] { --background: #000000; --foreground: #ffffff; --border: #ffffff14; --primary: #fff5b8; --primary-foreground: #000000; --secondary: #141414; --muted-foreground: #9b9b9b; --card: #0b0b0b; }
-    </style>
     <style id="footer-styles">
         .footer { border-top: 1px solid var(--border); padding: 96px 0 48px 0; background-color: var(--background); }
         .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 64px; margin-bottom: 64px; }
@@ -191,7 +212,18 @@
         .footer-link { font-size: 14px; font-weight: 500; color: var(--muted-foreground); cursor: pointer; transition: color 0.2s; }
         .footer-link:hover { color: var(--foreground); }
         .footer-bottom { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 32px; font-size: 13px; font-weight: 500; color: var(--muted-foreground); }
-        @media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; } .footer-brand { grid-column: 1 / -1; } .footer-bottom { flex-direction: column; gap: 16px; text-align: center; } }
+        
+        @media (max-width: 768px) { 
+            .footer { padding: 64px 0 32px 0; }
+            .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; } 
+            .footer-brand { grid-column: 1 / -1; } 
+            .footer-bottom { flex-direction: column; gap: 16px; text-align: center; } 
+        }
+    </style>
+
+    <style>
+        :root { --background: #ffffff; --foreground: #000000; --border: #00000014; --primary: #000000; --primary-foreground: #ffffff; --secondary: #f5f5f5; --muted-foreground: #888888; --card: #ffffff; --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px; --radius-xl: 12px; --font-family-body: 'Inter', sans-serif; }
+        [data-theme="dark"] { --background: #000000; --foreground: #ffffff; --border: #ffffff14; --primary: #fff5b8; --primary-foreground: #000000; --secondary: #141414; --muted-foreground: #9b9b9b; --card: #0b0b0b; }
     </style>
   </head>
 
@@ -206,30 +238,57 @@
         </div>
     @endif
 
+    <div class="mobile-menu-overlay" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <img src="{{ asset('images/logo.png') }}" class="site-logo" alt="Logo">
+            <button class="close-menu-btn" id="closeMenuBtn"><iconify-icon icon="lucide:x" style="font-size: 28px;"></iconify-icon></button>
+        </div>
+        <nav class="mobile-nav-links">
+            <a href="#">New Arrivals</a>
+            <a href="#">Tees</a>
+            <a href="#">Hoodies</a>
+            <a href="#">About Us</a>
+            @auth
+                <a href="{{ route('dashboard') }}" style="color: var(--primary);">My Account</a>
+            @else
+                <a href="{{ route('login') }}" style="color: var(--primary);">Login / Register</a>
+            @endauth
+        </nav>
+    </div>
+
     <header class="nav-wrapper" id="storeNavbar">
         <div class="navbar container">
-            <a href="/" class="nav-logo">
-                <img src="{{ asset('images/logo.png') }}" alt="Rapid Ink Logo" class="site-logo">
-            </a>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <iconify-icon icon="lucide:menu" style="font-size: 24px;"></iconify-icon>
+                </button>
+                <a href="/" class="nav-logo">
+                    <img src="{{ asset('images/logo.png') }}" alt="Rapid Ink Logo" class="site-logo">
+                </a>
+            </div>
+            
             <nav class="nav-links d-none-mobile">
                 <div class="nav-link nav-link-active">New Arrivals</div>
                 <div class="nav-link">Tees</div>
                 <div class="nav-link">Hoodies</div>
                 <div class="nav-link">About Us</div>
             </nav>
+            
             <div class="nav-actions">
-                <div class="nav-icon"><iconify-icon icon="lucide:search" style="font-size: 20px; color: var(--foreground)"></iconify-icon></div>
-                @auth
-                    <a href="{{ route('dashboard') }}" class="nav-icon"><iconify-icon icon="lucide:user" style="font-size: 20px; color: var(--foreground)"></iconify-icon></a>
-                @else
-                    <a href="{{ route('login') }}" class="nav-icon"><iconify-icon icon="lucide:user" style="font-size: 20px; color: var(--foreground)"></iconify-icon></a>
-                @endauth
+                <div class="nav-icon"><iconify-icon icon="lucide:search"></iconify-icon></div>
+                <div class="d-none-mobile">
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="nav-icon"><iconify-icon icon="lucide:user"></iconify-icon></a>
+                    @else
+                        <a href="{{ route('login') }}" class="nav-icon"><iconify-icon icon="lucide:user"></iconify-icon></a>
+                    @endauth
+                </div>
                 <div class="nav-icon">
-                    <iconify-icon icon="lucide:shopping-bag" style="font-size: 20px; color: var(--foreground)"></iconify-icon>
+                    <iconify-icon icon="lucide:shopping-bag"></iconify-icon>
                     <div class="nav-cart-badge">0</div>
                 </div>
                 <div class="nav-icon" id="theme-toggle">
-                    <iconify-icon icon="lucide:moon" style="font-size:20px; color:var(--foreground)"></iconify-icon>
+                    <iconify-icon icon="lucide:moon"></iconify-icon>
                 </div>
             </div>
         </div>
@@ -237,7 +296,6 @@
 
     <main>
         @php
-            // Extract and sort slides dynamically from database settings
             $slides = [];
             foreach($settings as $key => $val) {
                 if (preg_match('/^slide(\d+)_headline$/', $key, $matches)) {
@@ -251,12 +309,9 @@
                     ];
                 }
             }
-            ksort($slides); // Ensure they are in order (1, 2, 3, 4...)
-            
-            // Re-index array to start at 0 for the loop
+            ksort($slides); 
             $slides = array_values($slides); 
 
-            // Fallback default slides if database is entirely empty
             if (empty($slides)) {
                 $slides = [
                     [
@@ -299,28 +354,14 @@
             </div>
         </section>
 
-        <!-- <section class="category-strip">
-            <div class="container category-row">
-                <div class="category-label">Browse Rapid Ink</div>
-                <div class="category-pills">
-                    <div class="category-pill category-pill-active">All Tees</div>
-                    <div class="category-pill">Oversized</div>
-                    <div class="category-pill">Graphic Packs</div>
-                    <div class="category-pill">New This Week</div>
-                    <div class="category-pill">Under $50</div>
-                </div>
-                <button class="btn-link">View All <iconify-icon icon="lucide:arrow-right" style="font-size: 16px; margin-left: 6px"></iconify-icon></button>
-            </div>
-        </section> -->
-
-       <section id="trending" class="section-padding">
+        <section id="trending" class="section-padding">
             <div class="container">
                 <div class="trending-grid-header">
                     <div>
                         <h2 class="heading-lg">{{ $settings['trending_title'] ?? 'Trending Now' }}</h2>
                         <p class="text-muted" style="margin-top: 12px">Pieces the community is spinning on repeat this week.</p>
                     </div>
-                    <button class="btn btn-outline">View Full Drop</button>
+                    <a href="/products" class="btn btn-outline">View Full Drop</a>
                 </div>
                 
                 @php
@@ -336,7 +377,6 @@
                                     <a href="#" style="display: block;">
                                         <div class="trend-image-wrap">
                                             <span class="badge-trend">Hot</span>
-                                            
                                             @if($product->image)
                                                 <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
                                             @else
@@ -358,7 +398,6 @@
                                     <a href="#" style="display: block;">
                                         <div class="trend-image-wrap">
                                             <span class="badge-trend">Hot</span>
-                                            
                                             @if($product->image)
                                                 <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
                                             @else
@@ -378,7 +417,7 @@
                         </div>
                     </div>
                 @else
-                    <div style="text-align: center; padding: 80px 0; color: var(--muted-foreground); width: 100%;">
+                    <div style="text-align: center; padding: 60px 0; color: var(--muted-foreground); width: 100%;">
                         <iconify-icon icon="lucide:flame" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></iconify-icon>
                         <p style="font-size: 16px; font-weight: 500;">No trending products right now. Mark some in the admin panel!</p>
                     </div>
@@ -389,11 +428,8 @@
         @php
             $cats = [];
             foreach($settings as $key => $val) {
-                // Now matching ANY category key (title, image, or link)
                 if (preg_match('/^cat(\d+)_/', $key, $matches)) {
                     $idx = (int)$matches[1];
-                    
-                    // Create the category array if it doesn't exist yet
                     if (!isset($cats[$idx])) {
                         $cats[$idx] = [
                             'title' => $settings["cat{$idx}_title"] ?? 'New Category',
@@ -406,7 +442,6 @@
             ksort($cats);
             $cats = array_values($cats);
             
-            // Default fallbacks if database is completely empty
             if (empty($cats)) {
                 $cats = [
                     ['title' => 'Heavyweight Tees', 'image' => null, 'link' => '#'],
@@ -419,7 +454,6 @@
         <section class="section-padding" style="padding-top: 0; padding-bottom: 60px;">
             <div class="featured-marquee-wrapper">
                 <div class="featured-marquee-track">
-                    
                     @foreach($cats as $cat)
                         <a href="{{ $cat['link'] }}" class="cat-card">
                             @if($cat['image'])
@@ -433,7 +467,6 @@
                             </div>
                         </a>
                     @endforeach
-
                     @foreach($cats as $cat)
                         <a href="{{ $cat['link'] }}" class="cat-card" aria-hidden="true">
                             @if($cat['image'])
@@ -447,7 +480,6 @@
                             </div>
                         </a>
                     @endforeach
-
                     @foreach($cats as $cat)
                         <a href="{{ $cat['link'] }}" class="cat-card" aria-hidden="true">
                             @if($cat['image'])
@@ -461,7 +493,6 @@
                             </div>
                         </a>
                     @endforeach
-
                     @foreach($cats as $cat)
                         <a href="{{ $cat['link'] }}" class="cat-card" aria-hidden="true">
                             @if($cat['image'])
@@ -475,17 +506,16 @@
                             </div>
                         </a>
                     @endforeach
-
                 </div>
             </div>
         </section>
 
         <section class="section-padding" style="background-color: var(--secondary); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
             <div class="container">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 64px; align-items: center;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 48px; align-items: center;">
                     <div>
                         <h2 class="heading-lg" style="margin-bottom: 24px;">{{ $settings['brand_heading'] ?? 'Crafted for the Culture' }}</h2>
-                        <p class="text-muted" style="font-size: 18px; line-height: 1.8;">
+                        <p class="text-muted" style="font-size: 16px; line-height: 1.8;">
                             {{ $settings['brand_text'] ?? 'Rapid Ink was born out of a desire to blend street culture with premium quality fabrics. Every piece is designed with intention.' }}
                         </p>
                     </div>
@@ -496,127 +526,102 @@
             </div>
         </section>
 
-        <section class="section-padding" style="padding-top: 40px">
-        <div class="container">
-          <div class="masonry-section-header">
-            <div>
-              <h2 class="heading-lg">
-                {{ $settings['new_arrivals_title'] ?? 'Fresh Drops' }}
-              </h2>
-              <p class="text-muted" style="margin-top: 12px; max-width: 600px">
-                {{ $settings['new_arrivals_subtext'] ?? 'Curated tees infused with digital ink splatters and high-voltage lightning motifs. Grab them before they fade into the static.' }}
-              </p>
-            </div>
-            <a href="/products" class="btn btn-outline" data-media-type="banani-button">
-              View Collection
-            </a>
-          </div>
-
-          <div class="masonry-grid">
-            @if(isset($products) && $products->count() > 0)
-                @foreach($products->take(6) as $index => $product)
-                    @php
-                        $aspectRatios = ['3/4', '4/5', '1/1', '3/4', '4/5', '3/4'];
-                        $ratio = $aspectRatios[$index % 6];
-                    @endphp
-
-                    <article class="masonry-item" data-media-type="banani-button">
-                        <a href="#" style="display: block; color: inherit; text-decoration: none;">
-                            <div class="masonry-image-wrap">
-                                @if($product->image)
-                                    <img 
-                                        alt="{{ $product->name }}"
-                                        src="{{ asset('storage/' . $product->image) }}" 
-                                        style="aspect-ratio: {{ $ratio }}; object-fit: cover; width: 100%; display: block;" 
-                                    />
-                                @else
-                                    <div style="width: 100%; aspect-ratio: {{ $ratio }}; display: flex; align-items: center; justify-content: center; background: var(--secondary); color: var(--muted-foreground);">
-                                        <iconify-icon icon="lucide:image" style="font-size: 40px; opacity: 0.3;"></iconify-icon>
-                                    </div>
-                                @endif
-                                
-                                <div class="masonry-cart-btn">
-                                    <iconify-icon icon="lucide:shopping-cart" style="font-size: 20px; color: var(--primary-foreground)"></iconify-icon>
-                                </div>
-                            </div>
-                            <div class="masonry-info">
-                                <div class="masonry-text">
-                                    <div class="masonry-name">{{ $product->name }}</div>
-                                    <div class="masonry-price">${{ number_format($product->price, 2) }}</div>
-                                </div>
-                            </div>
-                        </a>
-                    </article>
-                @endforeach
-            @else
-                <div style="grid-column: 1 / -1; text-align: left; padding: 40px 0; color: var(--muted-foreground);">
-                    <iconify-icon icon="lucide:package-open" style="font-size: 40px; margin-bottom: 16px;"></iconify-icon>
-                    <p style="font-size: 16px; font-weight: 500;">No new arrivals yet. Check back soon!</p>
+        <section class="section-padding" style="padding-top: 80px">
+            <div class="container">
+                <div class="masonry-section-header">
+                    <div>
+                        <h2 class="heading-lg">
+                            {{ $settings['new_arrivals_title'] ?? 'Fresh Drops' }}
+                        </h2>
+                        <p class="text-muted" style="margin-top: 12px; max-width: 600px">
+                            {{ $settings['new_arrivals_subtext'] ?? 'Curated tees infused with digital ink splatters and high-voltage lightning motifs. Grab them before they fade into the static.' }}
+                        </p>
+                    </div>
+                    <a href="/products" class="btn btn-outline" data-media-type="banani-button">
+                        View Collection
+                    </a>
                 </div>
-            @endif
-          </div>
-        </div>
-      </section>
+
+                <div class="masonry-grid">
+                    @if(isset($products) && $products->count() > 0)
+                        @foreach($products->take(6) as $index => $product)
+                            @php
+                                $aspectRatios = ['3/4', '4/5', '1/1', '3/4', '4/5', '3/4'];
+                                $ratio = $aspectRatios[$index % 6];
+                            @endphp
+
+                            <article class="masonry-item" data-media-type="banani-button">
+                                <a href="#" style="display: block; color: inherit; text-decoration: none;">
+                                    <div class="masonry-image-wrap">
+                                        @if($product->image)
+                                            <img 
+                                                alt="{{ $product->name }}"
+                                                src="{{ asset('storage/' . $product->image) }}" 
+                                                style="aspect-ratio: {{ $ratio }}; object-fit: cover; width: 100%; display: block;" 
+                                            />
+                                        @else
+                                            <div style="width: 100%; aspect-ratio: {{ $ratio }}; display: flex; align-items: center; justify-content: center; background: var(--secondary); color: var(--muted-foreground);">
+                                                <iconify-icon icon="lucide:image" style="font-size: 40px; opacity: 0.3;"></iconify-icon>
+                                            </div>
+                                        @endif
+                                        
+                                        <div class="masonry-cart-btn">
+                                            <iconify-icon icon="lucide:shopping-cart" style="font-size: 20px; color: var(--primary-foreground)"></iconify-icon>
+                                        </div>
+                                    </div>
+                                    <div class="masonry-info">
+                                        <div class="masonry-text">
+                                            <div class="masonry-name">{{ $product->name }}</div>
+                                            <div class="masonry-price">${{ number_format($product->price, 2) }}</div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </article>
+                        @endforeach
+                    @else
+                        <div style="grid-column: 1 / -1; text-align: left; padding: 40px 0; color: var(--muted-foreground);">
+                            <iconify-icon icon="lucide:package-open" style="font-size: 40px; margin-bottom: 16px;"></iconify-icon>
+                            <p style="font-size: 16px; font-weight: 500;">No new arrivals yet. Check back soon!</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </section>
 
         <footer class="footer">
-        <div class="container">
-          <div class="footer-grid">
-            
-            <div class="footer-brand">
-                <a href="/" class="nav-logo">
-                    <img src="{{ asset('images/logo.png') }}" alt="Rapid Ink Logo" class="site-logo">
-                </a>
-              <p class="footer-desc">
-                Rapid Ink blends digital artistry with premium fabrics to deliver tees that feel as sharp as they look. Built for city nights and everyday motion.
-              </p>
-              <div style="display: flex; gap: 20px; margin-top: 8px">
-                <div class="nav-icon" data-media-type="banani-button">
-                  <iconify-icon icon="lucide:instagram" style="font-size: 24px; color: var(--foreground)"></iconify-icon>
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand">
+                        <a href="/" class="nav-logo">
+                            <img src="{{ asset('images/logo.png') }}" alt="Rapid Ink Logo" class="site-logo">
+                        </a>
+                        <p class="footer-desc">
+                            Rapid Ink blends digital artistry with premium fabrics to deliver tees that feel as sharp as they look. Built for city nights and everyday motion.
+                        </p>
+                        <div style="display: flex; gap: 20px; margin-top: 8px">
+                            <div class="nav-icon"><iconify-icon icon="lucide:instagram" style="font-size: 24px; color: var(--foreground)"></iconify-icon></div>
+                            <div class="nav-icon"><iconify-icon icon="lucide:twitter" style="font-size: 24px; color: var(--foreground)"></iconify-icon></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="footer-title">Shop</h4>
+                        <div class="footer-links"><div class="footer-link">All Tees</div><div class="footer-link">Oversized Fits</div><div class="footer-link">Artist Collabs</div><div class="footer-link">Bundles</div></div>
+                    </div>
+                    <div>
+                        <h4 class="footer-title">Help</h4>
+                        <div class="footer-links"><div class="footer-link">Shipping &amp; Returns</div><div class="footer-link">Size Guide</div><div class="footer-link">Track Order</div><div class="footer-link">FAQ</div></div>
+                    </div>
+                    <div>
+                        <h4 class="footer-title">About</h4>
+                        <div class="footer-links"><div class="footer-link">Our Story</div><div class="footer-link">Careers</div><div class="footer-link">Contact</div><div class="footer-link">Legal</div></div>
+                    </div>
                 </div>
-                <div class="nav-icon" data-media-type="banani-button">
-                  <iconify-icon icon="lucide:twitter" style="font-size: 24px; color: var(--foreground)"></iconify-icon>
+                <div class="footer-bottom">
+                    <span>© {{ date('Y') }} {{ $settings['site_title'] ?? 'Rapid Ink' }}. All rights reserved.</span>
+                    <span>High-voltage apparel · Designed for motion.</span>
                 </div>
-              </div>
             </div>
-
-            <div>
-              <h4 class="footer-title">Shop</h4>
-              <div class="footer-links">
-                <div class="footer-link" data-media-type="banani-button">All Tees</div>
-                <div class="footer-link" data-media-type="banani-button">Oversized Fits</div>
-                <div class="footer-link" data-media-type="banani-button">Artist Collabs</div>
-                <div class="footer-link" data-media-type="banani-button">Bundles</div>
-              </div>
-            </div>
-
-            <div>
-              <h4 class="footer-title">Help</h4>
-              <div class="footer-links">
-                <div class="footer-link" data-media-type="banani-button">Shipping &amp; Returns</div>
-                <div class="footer-link" data-media-type="banani-button">Size Guide</div>
-                <div class="footer-link" data-media-type="banani-button">Track Order</div>
-                <div class="footer-link" data-media-type="banani-button">FAQ</div>
-              </div>
-            </div>
-
-            <div>
-              <h4 class="footer-title">About</h4>
-              <div class="footer-links">
-                <div class="footer-link" data-media-type="banani-button">Our Story</div>
-                <div class="footer-link" data-media-type="banani-button">Careers</div>
-                <div class="footer-link" data-media-type="banani-button">Contact</div>
-                <div class="footer-link" data-media-type="banani-button">Legal</div>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="footer-bottom">
-            <span>© {{ date('Y') }} {{ $settings['site_title'] ?? 'Rapid Ink' }}. All rights reserved.</span>
-            <span>High-voltage apparel · Designed for motion.</span>
-          </div>
-        </div>
-      </footer>
+        </footer>
     </main>
 
     <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
@@ -646,6 +651,25 @@
                 });
             }
         })();
+
+        // Mobile Menu Toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            const closeBtn = document.getElementById('closeMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            if(menuBtn && closeBtn && mobileMenu) {
+                menuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.add('open');
+                    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                });
+
+                closeBtn.addEventListener('click', () => {
+                    mobileMenu.classList.remove('open');
+                    document.body.style.overflow = '';
+                });
+            }
+        });
 
         // Navbar Scroll Logic
         window.addEventListener('scroll', function() {
