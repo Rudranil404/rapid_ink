@@ -313,7 +313,7 @@
             </div>
         </section> -->
 
-        <section id="trending" class="section-padding">
+       <section id="trending" class="section-padding">
             <div class="container">
                 <div class="trending-grid-header">
                     <div>
@@ -323,17 +323,20 @@
                     <button class="btn btn-outline">View Full Drop</button>
                 </div>
                 
-                @if(isset($products) && $products->count() > 0)
+                @php
+                    $trendingProducts = isset($products) ? $products->where('is_trending', true) : collect();
+                @endphp
+
+                @if($trendingProducts->count() > 0)
                     <div class="trending-marquee-wrapper">
                         <div class="trending-marquee-track">
                             
-                            @foreach($products->take(8) as $product)
+                            @foreach($trendingProducts->take(8) as $product)
                                 <article class="trend-card">
                                     <a href="#" style="display: block;">
                                         <div class="trend-image-wrap">
-                                            @if($product->is_trending)
-                                                <span class="badge-trend">Hot</span>
-                                            @endif
+                                            <span class="badge-trend">Hot</span>
+                                            
                                             @if($product->image)
                                                 <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
                                             @else
@@ -350,13 +353,12 @@
                                 </article>
                             @endforeach
 
-                            @foreach($products->take(8) as $product)
+                            @foreach($trendingProducts->take(8) as $product)
                                 <article class="trend-card" aria-hidden="true">
                                     <a href="#" style="display: block;">
                                         <div class="trend-image-wrap">
-                                            @if($product->is_trending)
-                                                <span class="badge-trend">Hot</span>
-                                            @endif
+                                            <span class="badge-trend">Hot</span>
+                                            
                                             @if($product->image)
                                                 <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
                                             @else
@@ -377,8 +379,8 @@
                     </div>
                 @else
                     <div style="text-align: center; padding: 80px 0; color: var(--muted-foreground); width: 100%;">
-                        <iconify-icon icon="lucide:package-open" style="font-size: 48px; margin-bottom: 16px;"></iconify-icon>
-                        <p style="font-size: 16px; font-weight: 500;">No products available yet. Check back soon!</p>
+                        <iconify-icon icon="lucide:flame" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></iconify-icon>
+                        <p style="font-size: 16px; font-weight: 500;">No trending products right now. Mark some in the admin panel!</p>
                     </div>
                 @endif
             </div>
