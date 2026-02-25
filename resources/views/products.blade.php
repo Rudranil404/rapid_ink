@@ -100,7 +100,7 @@
                 <a href="{{ route('login') }}" class="d-none-mobile"><iconify-icon icon="lucide:user" class="nav-icon"></iconify-icon></a>
                 <div class="nav-icon d-none-mobile">
                     <iconify-icon icon="lucide:shopping-bag"></iconify-icon>
-                    <div class="badge-cart">0</div>
+                    <div class="badge-cart">{{ collect(session('cart', []))->sum('quantity') }}</div>
                 </div>
             </div>
         </div>
@@ -126,7 +126,14 @@
                             @endif
                             
                             <button class="add-cart-btn" onclick="event.preventDefault(); alert('Added to cart!');">
-                                <iconify-icon icon="lucide:shopping-cart" style="font-size: 18px;"></iconify-icon>
+                               <form action="{{ route('cart.add') }}" method="POST" style="position: absolute; bottom: 12px; right: 12px; z-index: 5;">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="add-cart-btn" style="position: static; opacity: 1; transform: none;" title="Add to Cart">
+                                        <iconify-icon icon="lucide:shopping-cart" style="font-size: 18px;"></iconify-icon>
+                                </button>
+                            </form>
                             </button>
                         </div>
                         <div>

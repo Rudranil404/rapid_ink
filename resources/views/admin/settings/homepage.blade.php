@@ -10,7 +10,6 @@
         .image-preview-box { width: 100%; height: 120px; background-color: #f3f4f6; border-radius: 8px; border: 1px dashed #d1d5db; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 12px; }
         .image-preview-box img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* Sticky Mobile Action Bar */
         @media (max-width: 768px) {
             .form-card { padding: 16px; }
             .sticky-mobile-action { 
@@ -36,28 +35,33 @@
             <div class="col-12 col-lg-8">
                 
                 @php
-                    $maxSlide = 3;
+                    // Extract exactly which slide IDs exist
+                    $slideIds = [];
                     foreach($settings as $key => $val) {
                         if (preg_match('/^slide(\d+)_/', $key, $matches)) {
-                            $maxSlide = max($maxSlide, (int)$matches[1]);
+                            $slideIds[] = (int)$matches[1];
                         }
                     }
+                    $slideIds = array_unique($slideIds);
+                    sort($slideIds);
+                    if (empty($slideIds)) $slideIds = [1]; // Fallback if DB is completely empty
+                    $highestSlideId = end($slideIds);
                 @endphp
 
                 <div class="form-card">
                     <div class="form-card-title">
                         <span><iconify-icon icon="lucide:images" class="me-2"></iconify-icon> Hero Carousel Setup</span>
-                        <span class="badge bg-dark section-badge" id="slide-count-badge">{{ $maxSlide }} Slides</span>
+                        <span class="badge bg-dark section-badge" id="slide-count-badge">{{ count($slideIds) }} Slides</span>
                     </div>
 
                     <input type="hidden" name="deleted_slides" id="deleted_slides" value="">
 
                     <ul class="nav nav-pills mb-3" id="hero-tabs" role="tablist">
-                        @for($i = 1; $i <= $maxSlide; $i++)
+                        @foreach($slideIds as $index => $i)
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link {{ $i == 1 ? 'active' : '' }}" id="tab-btn-{{$i}}" data-bs-toggle="pill" data-bs-target="#slide{{$i}}" type="button">Slide {{$i}}</button>
+                                <button class="nav-link {{ $index === 0 ? 'active' : '' }}" id="tab-btn-{{$i}}" data-bs-toggle="pill" data-bs-target="#slide{{$i}}" type="button">Slide {{$i}}</button>
                             </li>
-                        @endfor
+                        @endforeach
                         <li class="nav-item" role="presentation" id="addSlideBtnContainer">
                             <button class="nav-link text-success fw-bold" id="addSlideBtn" type="button">
                                 <iconify-icon icon="lucide:plus" class="me-1"></iconify-icon> Add Slide
@@ -66,8 +70,8 @@
                     </ul>
 
                     <div class="tab-content border rounded p-4 bg-light" id="hero-tabContent">
-                        @for($i = 1; $i <= $maxSlide; $i++)
-                            <div class="tab-pane fade {{ $i == 1 ? 'show active' : '' }}" id="slide{{$i}}" role="tabpanel">
+                        @foreach($slideIds as $index => $i)
+                            <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="slide{{$i}}" role="tabpanel">
                                 <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
                                     <h6 class="fw-bold mb-0 text-muted">Slide {{$i}} Settings</h6>
                                     @if($i > 1)
@@ -86,7 +90,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label text-muted small fw-bold text-uppercase">Background Image</label>
-                                    @if(isset($settings['slide'.$i.'_image']))
+                                    @if(isset($settings['slide'.$i.'_image']) && $settings['slide'.$i.'_image'])
                                         <div class="mb-2"><img src="{{ asset('storage/'.$settings['slide'.$i.'_image']) }}" height="60" class="rounded border"></div>
                                     @endif
                                     <input type="file" name="slide{{$i}}_image" class="form-control bg-white" accept="image/*">
@@ -102,24 +106,29 @@
                                     </div>
                                 </div>
                             </div>
-                        @endfor
+                        @endforeach
                     </div>
                 </div>
 
                 @php
-                    $maxCat = 3; 
+                    // Extract exactly which category IDs exist
+                    $catIds = [];
                     foreach($settings as $key => $val) {
                         if (preg_match('/^cat(\d+)_/', $key, $matches)) {
-                            $maxCat = max($maxCat, (int)$matches[1]);
+                            $catIds[] = (int)$matches[1];
                         }
                     }
+                    $catIds = array_unique($catIds);
+                    sort($catIds);
+                    if (empty($catIds)) $catIds = [1];
+                    $highestCatId = end($catIds);
                 @endphp
 
                 <div class="form-card">
                     <div class="form-card-title">
                         <span><iconify-icon icon="lucide:grid" class="me-2"></iconify-icon> Featured Categories</span>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-secondary section-badge" id="cat-count-badge">{{ $maxCat }} Categories</span>
+                            <span class="badge bg-secondary section-badge" id="cat-count-badge">{{ count($catIds) }} Categories</span>
                             <button class="btn btn-sm btn-outline-dark d-flex align-items-center gap-1" id="addCatBtn" type="button" style="padding: 2px 8px; font-size: 12px;">
                                 <iconify-icon icon="lucide:plus"></iconify-icon> Add
                             </button>
@@ -129,7 +138,7 @@
                     <input type="hidden" name="deleted_categories" id="deleted_categories" value="">
 
                     <div class="row g-4" id="categories-container">
-                        @for($i = 1; $i <= $maxCat; $i++)
+                        @foreach($catIds as $i)
                             <div class="col-md-4 category-block" id="cat-block-{{$i}}">
                                 <div class="p-3 border rounded bg-light position-relative">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -139,7 +148,7 @@
                                         </button>
                                     </div>
                                     <div class="image-preview-box">
-                                        @if(isset($settings['cat'.$i.'_image']))
+                                        @if(isset($settings['cat'.$i.'_image']) && $settings['cat'.$i.'_image'])
                                             <img src="{{ asset('storage/'.$settings['cat'.$i.'_image']) }}">
                                         @else
                                             <iconify-icon icon="lucide:image" style="font-size: 30px; color: #9ca3af;"></iconify-icon>
@@ -147,10 +156,10 @@
                                     </div>
                                     <input type="file" name="cat{{$i}}_image" class="form-control form-control-sm mb-2" accept="image/*">
                                     <input type="text" name="cat{{$i}}_title" class="form-control form-control-sm mb-2" placeholder="Category Title" value="{{ $settings['cat'.$i.'_title'] ?? '' }}">
-                                    <input type="text" name="cat{{$i}}_link" class="form-control form-control-sm" placeholder="Link (e.g., /category/tees)" value="{{ $settings['cat'.$i.'_link'] ?? '' }}">
+                                    <input type="text" name="cat{{$i}}_link" class="form-control form-control-sm" placeholder="Link (e.g., /products?category=T-Shirts)" value="{{ $settings['cat'.$i.'_link'] ?? '' }}">
                                 </div>
                             </div>
-                        @endfor
+                        @endforeach
                     </div>
                 </div>
 
@@ -173,7 +182,7 @@
                         <div class="col-md-4">
                             <label class="form-label text-muted small fw-bold text-uppercase">Side Image</label>
                             <div class="image-preview-box" style="height: 140px;">
-                                @if(isset($settings['brand_image']))
+                                @if(isset($settings['brand_image']) && $settings['brand_image'])
                                     <img src="{{ asset('storage/'.$settings['brand_image']) }}">
                                 @else
                                     <iconify-icon icon="lucide:image" style="font-size: 30px; color: #9ca3af;"></iconify-icon>
@@ -228,7 +237,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // --- SLIDE LOGIC ---
-            let highestSlideId = {{ $maxSlide }};
+            let highestSlideId = {{ $highestSlideId }};
             const addSlideBtn = document.getElementById('addSlideBtn');
             const tabList = document.getElementById('hero-tabs');
             const tabContent = document.getElementById('hero-tabContent');
@@ -288,14 +297,17 @@
                     if(tabBtn) tabBtn.closest('li').remove();
                     const tabPane = document.getElementById(`slide${slideId}`);
                     if(tabPane) tabPane.remove();
-                    const slide1Btn = document.getElementById('tab-btn-1');
-                    if(slide1Btn) slide1Btn.click();
+                    
+                    // Fallback to whichever is the first available tab
+                    const firstAvailableTab = document.querySelector('#hero-tabs .nav-link');
+                    if(firstAvailableTab) firstAvailableTab.click();
+                    
                     updateSlideBadge();
                 }
             });
 
             // --- CATEGORY LOGIC ---
-            let highestCatId = {{ $maxCat }};
+            let highestCatId = {{ $highestCatId }};
             const addCatBtn = document.getElementById('addCatBtn');
             const catContainer = document.getElementById('categories-container');
             const catBadge = document.getElementById('cat-count-badge');

@@ -21,33 +21,43 @@ class SettingController extends Controller
     {
         $data = $request->except(['_token']);
 
-        // 1. Handle Slide Deletions
+        // 1. Handle Slide Deletions (With strict PHP filtering to avoid SQL wildcard bugs)
         if (!empty($data['deleted_slides'])) {
             $deletedSlides = explode(',', $data['deleted_slides']);
             foreach ($deletedSlides as $slideId) {
+                $slideId = trim($slideId);
                 if (empty($slideId)) continue;
-                $keysToDelete = \App\Models\Setting::where('key', 'like', "slide{$slideId}\_%")->get();
+                
+                // Fetch broadly, but delete strictly matching exact prefixes
+                $keysToDelete = \App\Models\Setting::where('key', 'like', "slide{$slideId}_%")->get();
                 foreach ($keysToDelete as $setting) {
-                    if (str_contains($setting->key, '_image') && $setting->value) {
-                        \Illuminate\Support\Facades\Storage::disk('public')->delete($setting->value);
+                    if (str_starts_with($setting->key, "slide{$slideId}_")) {
+                        if (str_ends_with($setting->key, '_image') && $setting->value) {
+                            \Illuminate\Support\Facades\Storage::disk('public')->delete($setting->value);
+                        }
+                        $setting->delete();
                     }
-                    $setting->delete();
                 }
             }
         }
         unset($data['deleted_slides']);
 
-        // 2. Handle Category Deletions
+        // 2. Handle Category Deletions (Surgical precision fix for Zombie Categories)
         if (!empty($data['deleted_categories'])) {
             $deletedCats = explode(',', $data['deleted_categories']);
             foreach ($deletedCats as $catId) {
+                $catId = trim($catId);
                 if (empty($catId)) continue;
-                $keysToDelete = \App\Models\Setting::where('key', 'like', "cat{$catId}\_%")->get();
+                
+                // Fetch broadly, but delete strictly matching exact prefixes
+                $keysToDelete = \App\Models\Setting::where('key', 'like', "cat{$catId}_%")->get();
                 foreach ($keysToDelete as $setting) {
-                    if (str_contains($setting->key, '_image') && $setting->value) {
-                        \Illuminate\Support\Facades\Storage::disk('public')->delete($setting->value);
+                    if (str_starts_with($setting->key, "cat{$catId}_")) {
+                        if (str_ends_with($setting->key, '_image') && $setting->value) {
+                            \Illuminate\Support\Facades\Storage::disk('public')->delete($setting->value);
+                        }
+                        $setting->delete();
                     }
-                    $setting->delete();
                 }
             }
         }
@@ -55,6 +65,7 @@ class SettingController extends Controller
 
         // 3. Process Standard Updates & New Uploads
         foreach ($data as $key => $value) {
+            // Handle valid file uploads
             if ($request->hasFile($key)) {
                 $oldSetting = \App\Models\Setting::where('key', $key)->first();
                 if ($oldSetting && $oldSetting->value) {
@@ -62,9 +73,15 @@ class SettingController extends Controller
                 }
                 $path = $request->file($key)->store('homepage', 'public');
                 \App\Models\Setting::updateOrCreate(['key' => $key], ['value' => $path]);
-            } else {
-                // FIX: If a text field is left empty, save it as an empty string instead of ignoring it.
-                // This ensures the database knows the category/slide block exists!
+            } 
+            // Handle Text Inputs
+            else {
+                // FIX: If the input is meant for an image, but it's empty, SKIP IT.
+                // This stops Category Images and Brand Banners from wiping out!
+                if (str_ends_with($key, '_image')) {
+                    continue;
+                }
+
                 \App\Models\Setting::updateOrCreate(
                     ['key' => $key], 
                     ['value' => $value ?? ''] 
