@@ -9,21 +9,25 @@
         .section-badge { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 8px; border-radius: 4px; }
         .image-preview-box { width: 100%; height: 120px; background-color: #f3f4f6; border-radius: 8px; border: 1px dashed #d1d5db; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 12px; }
         .image-preview-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Sticky Mobile Action Bar */
+        @media (max-width: 768px) {
+            .form-card { padding: 16px; }
+            .sticky-mobile-action { 
+                position: sticky; top: 69px; z-index: 100; 
+                background: var(--bg-light); padding: 12px 0; margin-top: -16px; margin-bottom: 16px;
+                border-bottom: 1px solid #e5e7eb;
+            }
+        }
     </style>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold mb-0">Home Page Content</h4>
+    <div class="d-flex justify-content-between align-items-center mb-4 sticky-mobile-action">
+        <h4 class="fw-bold mb-0 d-none d-md-block">Home Page Content</h4>
+        <span class="d-md-none text-muted small fw-bold text-uppercase">Edit Storefront</span>
         <button type="submit" form="homepageForm" class="btn btn-brand d-flex align-items-center gap-2">
-            <iconify-icon icon="lucide:save"></iconify-icon> Save All Changes
+            <iconify-icon icon="lucide:save"></iconify-icon> Save
         </button>
     </div>
-
-    <!-- @if(session('success'))
-        <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center gap-2">
-            <iconify-icon icon="lucide:check-circle-2" style="font-size: 20px;"></iconify-icon>
-            {{ session('success') }}
-        </div>
-    @endif -->
 
     <form id="homepageForm" action="{{ route('admin.settings.homepage.update') }}" method="POST" enctype="multipart/form-data">
         @csrf
@@ -64,7 +68,6 @@
                     <div class="tab-content border rounded p-4 bg-light" id="hero-tabContent">
                         @for($i = 1; $i <= $maxSlide; $i++)
                             <div class="tab-pane fade {{ $i == 1 ? 'show active' : '' }}" id="slide{{$i}}" role="tabpanel">
-                                
                                 <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
                                     <h6 class="fw-bold mb-0 text-muted">Slide {{$i}} Settings</h6>
                                     @if($i > 1)
@@ -73,7 +76,6 @@
                                         </button>
                                     @endif
                                 </div>
-
                                 <div class="mb-3">
                                     <label class="form-label text-muted small fw-bold text-uppercase">Headline</label>
                                     <input type="text" name="slide{{$i}}_headline" class="form-control" value="{{ $settings['slide'.$i.'_headline'] ?? '' }}">
@@ -104,13 +106,8 @@
                     </div>
                 </div>
 
-   
-
-
-
                 @php
-                    // Calculate how many categories currently exist
-                    $maxCat = 3; // Default minimum
+                    $maxCat = 3; 
                     foreach($settings as $key => $val) {
                         if (preg_match('/^cat(\d+)_/', $key, $matches)) {
                             $maxCat = max($maxCat, (int)$matches[1]);
@@ -162,7 +159,6 @@
                         <span><iconify-icon icon="lucide:book-open" class="me-2"></iconify-icon> Brand Story Banner</span>
                         <span class="badge bg-secondary section-badge">Lower Section</span>
                     </div>
-                    
                     <div class="row g-4">
                         <div class="col-md-8">
                             <div class="mb-3">
@@ -187,11 +183,9 @@
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <div class="col-12 col-lg-4">
-                
                 <div class="form-card">
                     <div class="form-card-title">General Settings</div>
                     <div class="mb-3">
@@ -200,7 +194,7 @@
                     </div>
                     <div class="mb-0">
                         <label class="form-label text-muted small fw-bold text-uppercase">Home Meta Description</label>
-                        <textarea name="meta_description" class="form-control" rows="3" placeholder="For SEO purposes...">{{ $settings['meta_description'] ?? 'Shop the latest premium streetwear and heavyweight tees at Rapid Ink.' }}</textarea>
+                        <textarea name="meta_description" class="form-control" rows="3">{{ $settings['meta_description'] ?? 'Shop the latest premium streetwear and heavyweight tees at Rapid Ink.' }}</textarea>
                     </div>
                 </div>
 
@@ -218,33 +212,88 @@
 
                 <div class="form-card">
                     <div class="form-card-title">Dynamic Product Rows</div>
-                    <p class="text-muted small mb-3">These titles appear above the product grids that are generated automatically from your inventory.</p>
-                    
                     <div class="mb-3">
                         <label class="form-label text-muted small fw-bold text-uppercase">Trending Section Title</label>
                         <input type="text" name="trending_title" class="form-control" value="{{ $settings['trending_title'] ?? 'Trending Now' }}">
                     </div>
-                    
                     <div class="mb-0">
                         <label class="form-label text-muted small fw-bold text-uppercase">New Arrivals Title</label>
                         <input type="text" name="new_arrivals_title" class="form-control" value="{{ $settings['new_arrivals_title'] ?? 'Fresh Drops' }}">
                     </div>
                 </div>
-
             </div>
         </div>
     </form>
-@endsection
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Track the highest ID to prevent element ID collisions when adding/deleting
+            // --- SLIDE LOGIC ---
             let highestSlideId = {{ $maxSlide }};
-            const addBtn = document.getElementById('addSlideBtn');
+            const addSlideBtn = document.getElementById('addSlideBtn');
             const tabList = document.getElementById('hero-tabs');
             const tabContent = document.getElementById('hero-tabContent');
-            const badge = document.getElementById('slide-count-badge');
-            const deletedInput = document.getElementById('deleted_slides');
+            const slideBadge = document.getElementById('slide-count-badge');
+            const deletedSlideInput = document.getElementById('deleted_slides');
+
+            function updateSlideBadge() {
+                const visibleSlides = document.querySelectorAll('#hero-tabs .nav-item:not(#addSlideBtnContainer)').length;
+                slideBadge.textContent = visibleSlides + ' Slides';
+            }
+
+            addSlideBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                highestSlideId++;
+                let i = highestSlideId;
+
+                let newLi = document.createElement('li');
+                newLi.className = 'nav-item';
+                newLi.setAttribute('role', 'presentation');
+                newLi.innerHTML = `<button class="nav-link" id="tab-btn-${i}" data-bs-toggle="pill" data-bs-target="#slide${i}" type="button">Slide ${i}</button>`;
+                tabList.insertBefore(newLi, document.getElementById('addSlideBtnContainer'));
+
+                let newPane = document.createElement('div');
+                newPane.className = 'tab-pane fade';
+                newPane.id = `slide${i}`;
+                newPane.setAttribute('role', 'tabpanel');
+                newPane.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                        <h6 class="fw-bold mb-0 text-muted">Slide ${i} Settings</h6>
+                        <button type="button" class="btn btn-sm btn-outline-danger delete-slide-btn" data-slide-id="${i}">
+                            <iconify-icon icon="lucide:trash-2" style="margin-right: 4px;"></iconify-icon> Delete Slide
+                        </button>
+                    </div>
+                    <div class="mb-3"><label class="form-label text-muted small fw-bold text-uppercase">Headline</label><input type="text" name="slide${i}_headline" class="form-control" placeholder="New Slide Headline"></div>
+                    <div class="mb-3"><label class="form-label text-muted small fw-bold text-uppercase">Subtext</label><input type="text" name="slide${i}_subtext" class="form-control" placeholder="New Slide Subtext"></div>
+                    <div class="mb-3"><label class="form-label text-muted small fw-bold text-uppercase">Background Image</label><input type="file" name="slide${i}_image" class="form-control bg-white" accept="image/*"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label text-muted small fw-bold text-uppercase">Button Text</label><input type="text" name="slide${i}_btn_text" class="form-control" value="Shop Now"></div>
+                        <div class="col-md-6"><label class="form-label text-muted small fw-bold text-uppercase">Button Link</label><input type="text" name="slide${i}_btn_link" class="form-control" value="/products"></div>
+                    </div>
+                `;
+                tabContent.appendChild(newPane);
+                newLi.querySelector('button').click();
+                updateSlideBadge();
+            });
+
+            document.addEventListener('click', function(e) {
+                const deleteBtn = e.target.closest('.delete-slide-btn');
+                if (deleteBtn && confirm('Are you sure you want to delete this slide? It will be permanently removed upon saving.')) {
+                    const slideId = deleteBtn.getAttribute('data-slide-id');
+                    let currentDeleted = deletedSlideInput.value ? deletedSlideInput.value.split(',') : [];
+                    if (!currentDeleted.includes(slideId)) {
+                        currentDeleted.push(slideId);
+                        deletedSlideInput.value = currentDeleted.join(',');
+                    }
+                    const tabBtn = document.getElementById(`tab-btn-${slideId}`);
+                    if(tabBtn) tabBtn.closest('li').remove();
+                    const tabPane = document.getElementById(`slide${slideId}`);
+                    if(tabPane) tabPane.remove();
+                    const slide1Btn = document.getElementById('tab-btn-1');
+                    if(slide1Btn) slide1Btn.click();
+                    updateSlideBadge();
+                }
+            });
+
             // --- CATEGORY LOGIC ---
             let highestCatId = {{ $maxCat }};
             const addCatBtn = document.getElementById('addCatBtn');
@@ -287,113 +336,18 @@
 
             document.addEventListener('click', function(e) {
                 const deleteCatBtn = e.target.closest('.delete-cat-btn');
-                if (deleteCatBtn) {
-                    if (confirm('Delete this category?')) {
-                        const catId = deleteCatBtn.getAttribute('data-cat-id');
-                        
-                        let currentDeleted = deletedCatInput.value ? deletedCatInput.value.split(',') : [];
-                        if (!currentDeleted.includes(catId)) {
-                            currentDeleted.push(catId);
-                            deletedCatInput.value = currentDeleted.join(',');
-                        }
-
-                        const catBlock = document.getElementById(`cat-block-${catId}`);
-                        if(catBlock) catBlock.remove();
-                        
-                        updateCatBadge();
+                if (deleteCatBtn && confirm('Delete this category?')) {
+                    const catId = deleteCatBtn.getAttribute('data-cat-id');
+                    let currentDeleted = deletedCatInput.value ? deletedCatInput.value.split(',') : [];
+                    if (!currentDeleted.includes(catId)) {
+                        currentDeleted.push(catId);
+                        deletedCatInput.value = currentDeleted.join(',');
                     }
-                }
-            });
-
-            function updateBadgeCount() {
-                const visibleSlides = document.querySelectorAll('#hero-tabs .nav-item:not(#addSlideBtnContainer)').length;
-                badge.textContent = visibleSlides + ' Slides';
-            }
-
-            // --- ADD SLIDE LOGIC ---
-            addBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                highestSlideId++;
-                let i = highestSlideId;
-
-                // Create new Tab Button
-                let newLi = document.createElement('li');
-                newLi.className = 'nav-item';
-                newLi.setAttribute('role', 'presentation');
-                newLi.innerHTML = `<button class="nav-link" id="tab-btn-${i}" data-bs-toggle="pill" data-bs-target="#slide${i}" type="button">Slide ${i}</button>`;
-                tabList.insertBefore(newLi, document.getElementById('addSlideBtnContainer'));
-
-                // Create new Tab Content Area
-                let newPane = document.createElement('div');
-                newPane.className = 'tab-pane fade';
-                newPane.id = `slide${i}`;
-                newPane.setAttribute('role', 'tabpanel');
-                newPane.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-                        <h6 class="fw-bold mb-0 text-muted">Slide ${i} Settings</h6>
-                        <button type="button" class="btn btn-sm btn-outline-danger delete-slide-btn" data-slide-id="${i}">
-                            <iconify-icon icon="lucide:trash-2" style="margin-right: 4px;"></iconify-icon> Delete Slide
-                        </button>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold text-uppercase">Headline</label>
-                        <input type="text" name="slide${i}_headline" class="form-control" placeholder="New Slide Headline">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold text-uppercase">Subtext</label>
-                        <input type="text" name="slide${i}_subtext" class="form-control" placeholder="New Slide Subtext">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold text-uppercase">Background Image</label>
-                        <input type="file" name="slide${i}_image" class="form-control bg-white" accept="image/*">
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Button Text</label>
-                            <input type="text" name="slide${i}_btn_text" class="form-control" value="Shop Now">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Button Link</label>
-                            <input type="text" name="slide${i}_btn_link" class="form-control" value="/products">
-                        </div>
-                    </div>
-                `;
-                tabContent.appendChild(newPane);
-                
-                // Automatically activate the new tab
-                newLi.querySelector('button').click();
-                updateBadgeCount();
-            });
-
-            // --- DELETE SLIDE LOGIC ---
-            // We use Event Delegation because delete buttons can be dynamically created
-            document.addEventListener('click', function(e) {
-                const deleteBtn = e.target.closest('.delete-slide-btn');
-                if (deleteBtn) {
-                    if (confirm('Are you sure you want to delete this slide? It will be permanently removed upon saving.')) {
-                        const slideId = deleteBtn.getAttribute('data-slide-id');
-                        
-                        // 1. Add ID to hidden input for backend to process
-                        let currentDeleted = deletedInput.value ? deletedInput.value.split(',') : [];
-                        if (!currentDeleted.includes(slideId)) {
-                            currentDeleted.push(slideId);
-                            deletedInput.value = currentDeleted.join(',');
-                        }
-
-                        // 2. Remove Tab and Content from Screen
-                        const tabBtn = document.getElementById(`tab-btn-${slideId}`);
-                        if(tabBtn) tabBtn.closest('li').remove();
-                        
-                        const tabPane = document.getElementById(`slide${slideId}`);
-                        if(tabPane) tabPane.remove();
-
-                        // 3. Fallback to Slide 1 so the UI doesn't look empty
-                        const slide1Btn = document.getElementById('tab-btn-1');
-                        if(slide1Btn) slide1Btn.click();
-                        
-                        updateBadgeCount();
-                    }
+                    const catBlock = document.getElementById(`cat-block-${catId}`);
+                    if(catBlock) catBlock.remove();
+                    updateCatBadge();
                 }
             });
         });
     </script>
+@endsection

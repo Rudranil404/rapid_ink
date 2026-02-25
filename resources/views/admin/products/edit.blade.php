@@ -16,18 +16,29 @@
         .variant-checkbox input[type="checkbox"] { display: none; }
         .variant-checkbox label { border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.2s; background-color: #ffffff; }
         .variant-checkbox input[type="checkbox"]:checked + label { background-color: #000000; color: #ffffff; border-color: #000000; }
+        
+        /* Sticky Mobile Action Bar */
+        @media (max-width: 768px) {
+            .form-card { padding: 16px; }
+            .sticky-mobile-action { 
+                position: sticky; top: 69px; z-index: 100; 
+                background: var(--bg-light); padding: 12px 0; margin-top: -16px; margin-bottom: 16px;
+                border-bottom: 1px solid #e5e7eb;
+            }
+        }
     </style>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 sticky-mobile-action">
         <div class="d-flex align-items-center gap-3">
             <a href="{{ route('admin.products.index') }}" class="btn btn-sm btn-light border p-2" title="Go Back">
                 <iconify-icon icon="lucide:arrow-left" style="font-size: 18px;"></iconify-icon>
             </a>
-            <h4 class="fw-bold mb-0">Edit Product: {{ $product->name }}</h4>
+            <h4 class="fw-bold mb-0 d-none d-md-block">Edit Product</h4>
+            <span class="d-md-none text-muted small fw-bold text-uppercase">Edit Product</span>
         </div>
         <div>
             <button type="submit" form="productForm" class="btn btn-brand d-flex align-items-center gap-2">
-                <iconify-icon icon="lucide:save"></iconify-icon> Update Product
+                <iconify-icon icon="lucide:save"></iconify-icon> Update
             </button>
         </div>
     </div>
@@ -44,16 +55,16 @@
 
     <form id="productForm" action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
-        @method('PUT') <div class="row g-4">
+        @method('PUT')
+        
+        <div class="row g-4">
             <div class="col-12 col-lg-8">
                 <div class="form-card">
                     <div class="form-card-title">Basic Information</div>
-                    
                     <div class="mb-4">
                         <label class="form-label">Product Name *</label>
                         <input type="text" name="name" class="form-control" value="{{ old('name', $product->name) }}" required>
                     </div>
-                    
                     <div class="mb-3">
                         <label class="form-label">Description</label>
                         <textarea name="description" class="form-control" rows="5">{{ old('description', $product->description) }}</textarea>
@@ -65,7 +76,6 @@
                         <span>Media Gallery</span>
                         <span class="badge bg-light text-muted border">Max 10 Images</span>
                     </div>
-                    
                     @if(!empty($product->images))
                         <div class="mb-3 p-3 bg-light rounded border d-flex gap-2 overflow-auto">
                             @foreach($product->images as $img)
@@ -74,7 +84,6 @@
                         </div>
                         <p class="text-muted small">Uploading new images will replace the current ones.</p>
                     @endif
-
                     <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
                         <iconify-icon icon="lucide:image-plus" class="upload-icon"></iconify-icon>
                         <h6 class="fw-bold">Click to upload new images</h6>
@@ -85,12 +94,10 @@
 
                 <div class="form-card">
                     <div class="form-card-title">Variants & Attributes</div>
-                    
                     @php 
                         $selectedSizes = is_array($product->sizes) ? $product->sizes : []; 
                         $selectedColors = is_array($product->colors) ? $product->colors : []; 
                     @endphp
-
                     <div class="mb-4">
                         <label class="form-label d-block mb-3">Available Sizes</label>
                         @foreach(['XS', 'S', 'M', 'L', 'XL', 'XXL'] as $size)
@@ -100,7 +107,6 @@
                             </div>
                         @endforeach
                     </div>
-
                     <div>
                         <label class="form-label d-block mb-3">Available Colors</label>
                         @foreach(['Black', 'White', 'Heather Gray', 'Custom'] as $color)
@@ -140,7 +146,6 @@
                             <option value="Bottoms" {{ $product->category == 'Bottoms' ? 'selected' : '' }}>Bottoms</option>
                         </select>
                     </div>
-
                     <div class="mb-4">
                         <label class="form-label">Product Status</label>
                         <select name="status" class="form-select">
@@ -148,7 +153,6 @@
                             <option value="draft" {{ $product->status == 'draft' ? 'selected' : '' }}>Draft (Hidden)</option>
                         </select>
                     </div>
-
                     <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 bg-light">
                         <div>
                             <div class="fw-bold" style="font-size: 14px;">Trending Product</div>
