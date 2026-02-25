@@ -3,6 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SettingController;
+use App\Models\Product;
+use App\Models\Setting;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 // Storefront
 Route::get('/', [ProductController::class, 'index']);
@@ -46,3 +51,24 @@ Route::get('/dashboard', function () {
     // If it's a normal customer, send them back to the storefront
     return redirect('/');
 })->middleware(['auth'])->name('dashboard');
+
+// Public Catalog Route with Dynamic Filtering
+Route::get('/products', function (Request $request) {
+    $settings = Setting::pluck('value', 'key')->toArray();
+    
+    // Start with active products, newest first
+    $query = Product::where('status', 'active')->latest();
+    
+    // If a category is clicked (e.g. ?category=T-Shirts), filter the query
+    if ($request->has('category') && $request->category != '') {
+        $query->where('category', $request->category);
+        $currentCategory = $request->category;
+    } else {
+        $currentCategory = 'All Collection';
+    }
+
+    // Paginate results (24 products per page)
+    $products = $query->paginate(24);
+    
+    return view('products', compact('settings', 'products', 'currentCategory'));
+})->name('products.index');

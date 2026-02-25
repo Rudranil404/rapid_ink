@@ -257,10 +257,10 @@
             <button class="close-menu-btn" id="closeMenuBtn"><iconify-icon icon="lucide:x" style="font-size: 28px;"></iconify-icon></button>
         </div>
         <nav class="mobile-nav-links">
-            <a href="#">New Arrivals</a>
-            <a href="#">Tees</a>
-            <a href="#">Hoodies</a>
-            <a href="#">About Us</a>
+            <a href="/products">All Collection</a>
+            <a href="/products?category=T-Shirts">Tees</a>
+            <a href="/products?category=Hoodies">Hoodies</a>
+            <a href="/products?category=Accessories">Accessories</a>
             @auth
                 <a href="{{ route('dashboard') }}" style="color: var(--primary);">My Account</a>
             @else
@@ -281,10 +281,10 @@
             </div>
             
             <nav class="nav-links d-none-mobile">
-                <div class="nav-link nav-link-active">New Arrivals</div>
-                <div class="nav-link">Tees</div>
-                <div class="nav-link">Hoodies</div>
-                <div class="nav-link">About Us</div>
+                <a href="/products" class="nav-link nav-link-active">New Arrivals</a>
+                <a href="/products?category=T-Shirts" class="nav-link">Tees</a>
+                <a href="/products?category=Hoodies" class="nav-link">Hoodies</a>
+                <a href="/products?category=Bottoms" class="nav-link">Bottoms</a>
             </nav>
             
             <div class="nav-actions">
