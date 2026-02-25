@@ -84,18 +84,33 @@
     </style>
 
     <style id="trending-grid-styles">
-        .category-strip { background-color: var(--card); padding: 24px 0; border-bottom: 1px solid var(--border); }
-        .category-row { display: flex; align-items: center; justify-content: space-between; gap: 32px; }
-        .category-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted-foreground); }
-        .category-pills { display: flex; flex: 1; gap: 16px; overflow-x: auto; scrollbar-width: none; }
-        .category-pills::-webkit-scrollbar { display: none; }
-        .category-pill { padding: 10px 20px; border-radius: var(--radius-xl); background-color: var(--background); border: 1px solid var(--border); font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: all 0.2s; }
-        .category-pill:hover { border-color: var(--foreground); }
-        .category-pill-active { background-color: var(--foreground); color: var(--background); border-color: var(--foreground); }
-
         .trending-grid-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; }
-        .trending-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; }
-        .trend-card { cursor: pointer; display: block; text-decoration: none; color: inherit; transition: transform 0.3s; }
+        
+        /* Marquee Container Styles */
+        .trending-marquee-wrapper { width: 100%; overflow: hidden; position: relative; padding: 10px 0; }
+        
+        /* The scrolling track */
+        .trending-marquee-track { 
+            display: flex; 
+            gap: 32px; 
+            width: max-content; 
+            /* 40s duration gives a slow, buttery scroll. Adjust time to make it faster/slower */
+            animation: marquee-scroll 40s linear infinite; 
+        }
+        
+        /* Pause the scroll when the user hovers over a product */
+        .trending-marquee-wrapper:hover .trending-marquee-track {
+            animation-play-state: paused;
+        }
+
+        @keyframes marquee-scroll {
+            0% { transform: translateX(0); }
+            /* Translate by exactly half the width (since we duplicate the items) minus half the gap */
+            100% { transform: translateX(calc(-50% - 16px)); } 
+        }
+
+        /* Fixed width for cards so they scroll smoothly */
+        .trend-card { cursor: pointer; display: block; text-decoration: none; color: inherit; width: 280px; flex-shrink: 0; transition: transform 0.3s; }
         .trend-card:hover { transform: translateY(-8px); }
         .trend-image-wrap { width: 100%; aspect-ratio: 3/4; background-color: var(--secondary); border-radius: var(--radius-md); border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; position: relative; }
         .trend-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s; }
@@ -104,14 +119,37 @@
         .trend-title { font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; margin-bottom: 6px; color: var(--foreground); }
         .trend-meta { font-size: 14px; font-weight: 600; color: var(--muted-foreground); }
         .badge-trend { position: absolute; top: 12px; left: 12px; background-color: var(--foreground); color: var(--background); font-size: 11px; font-weight: 800; padding: 6px 12px; text-transform: uppercase; z-index: 2; border-radius: var(--radius-sm); }
-        @media (max-width: 1024px) { .trending-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 768px) { .trending-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; } .container { padding: 0 24px; } }
+        
+        @media (max-width: 768px) { 
+            .container { padding: 0 24px; } 
+            .trend-card { width: 240px; }
+        }
     </style>
 
     <style id="custom-featured-styles">
-        /* Replaces Promo Row with Dynamic Featured Categories */
-        .featured-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
-        .cat-card { background-color: var(--card); border-radius: var(--radius-lg); border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; position: relative; overflow: hidden; min-height: 350px; text-decoration: none; }
+        /* Marquee Container Styles for Featured Categories */
+        .featured-marquee-wrapper { width: 100%; overflow: hidden; position: relative; padding: 10px 0; }
+        
+        .featured-marquee-track { 
+            display: flex; 
+            gap: 32px; 
+            width: max-content; 
+            /* 45s duration gives a nice, heavy, slow scroll */
+            animation: featured-marquee-scroll 45s linear infinite; 
+        }
+        
+        /* Pause on hover so users can click the links easily */
+        .featured-marquee-wrapper:hover .featured-marquee-track {
+            animation-play-state: paused;
+        }
+
+        @keyframes featured-marquee-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-50% - 16px)); } 
+        }
+
+        /* Fixed dimensions so cards don't shrink while scrolling */
+        .cat-card { background-color: var(--card); border-radius: var(--radius-lg); border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; position: relative; overflow: hidden; height: 450px; width: 380px; flex-shrink: 0; text-decoration: none; }
         .cat-card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 100%); z-index: 1; transition: opacity 0.3s; }
         .cat-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; transition: transform 0.6s ease; }
         .cat-card:hover img { transform: scale(1.08); }
@@ -119,7 +157,10 @@
         .cat-card-content { position: relative; z-index: 2; color: #ffffff; }
         .cat-title { font-size: 28px; font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; margin: 0; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
         .cat-link { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-top: 12px; display: inline-flex; align-items: center; gap: 4px; }
-        @media (max-width: 1024px) { .featured-row { grid-template-columns: 1fr; } }
+        
+        @media (max-width: 768px) { 
+            .cat-card { width: 300px; height: 380px; padding: 30px; }
+        }
     </style>
 
     <style id="masonry-section-styles">
@@ -258,7 +299,7 @@
             </div>
         </section>
 
-        <section class="category-strip">
+        <!-- <section class="category-strip">
             <div class="container category-row">
                 <div class="category-label">Browse Rapid Ink</div>
                 <div class="category-pills">
@@ -270,7 +311,7 @@
                 </div>
                 <button class="btn-link">View All <iconify-icon icon="lucide:arrow-right" style="font-size: 16px; margin-left: 6px"></iconify-icon></button>
             </div>
-        </section>
+        </section> -->
 
         <section id="trending" class="section-padding">
             <div class="container">
@@ -282,37 +323,64 @@
                     <button class="btn btn-outline">View Full Drop</button>
                 </div>
                 
-                <div class="trending-grid">
-                    @if(isset($products) && $products->count() > 0)
-                        @foreach($products->take(8) as $product)
-                            <article class="trend-card">
-                                <a href="#" style="display: block;">
-                                    <div class="trend-image-wrap">
-                                        @if($product->is_trending)
-                                            <span class="badge-trend">Hot</span>
-                                        @endif
-                                        @if($product->image)
-                                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
-                                        @else
-                                            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--secondary); color:var(--muted-foreground);">
-                                                <iconify-icon icon="lucide:image" style="font-size: 40px; opacity: 0.3;"></iconify-icon>
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <div class="trend-info">
-                                        <div class="trend-title">{{ $product->name }}</div>
-                                        <div class="trend-meta">${{ number_format($product->price, 2) }}</div>
-                                    </div>
-                                </a>
-                            </article>
-                        @endforeach
-                    @else
-                        <div style="grid-column: 1 / -1; text-align: center; padding: 80px 0; color: var(--muted-foreground);">
-                            <iconify-icon icon="lucide:package-open" style="font-size: 48px; margin-bottom: 16px;"></iconify-icon>
-                            <p style="font-size: 16px; font-weight: 500;">No products available yet. Check back soon!</p>
+                @if(isset($products) && $products->count() > 0)
+                    <div class="trending-marquee-wrapper">
+                        <div class="trending-marquee-track">
+                            
+                            @foreach($products->take(8) as $product)
+                                <article class="trend-card">
+                                    <a href="#" style="display: block;">
+                                        <div class="trend-image-wrap">
+                                            @if($product->is_trending)
+                                                <span class="badge-trend">Hot</span>
+                                            @endif
+                                            @if($product->image)
+                                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
+                                            @else
+                                                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--secondary); color:var(--muted-foreground);">
+                                                    <iconify-icon icon="lucide:image" style="font-size: 40px; opacity: 0.3;"></iconify-icon>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="trend-info">
+                                            <div class="trend-title">{{ $product->name }}</div>
+                                            <div class="trend-meta">${{ number_format($product->price, 2) }}</div>
+                                        </div>
+                                    </a>
+                                </article>
+                            @endforeach
+
+                            @foreach($products->take(8) as $product)
+                                <article class="trend-card" aria-hidden="true">
+                                    <a href="#" style="display: block;">
+                                        <div class="trend-image-wrap">
+                                            @if($product->is_trending)
+                                                <span class="badge-trend">Hot</span>
+                                            @endif
+                                            @if($product->image)
+                                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
+                                            @else
+                                                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--secondary); color:var(--muted-foreground);">
+                                                    <iconify-icon icon="lucide:image" style="font-size: 40px; opacity: 0.3;"></iconify-icon>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="trend-info">
+                                            <div class="trend-title">{{ $product->name }}</div>
+                                            <div class="trend-meta">${{ number_format($product->price, 2) }}</div>
+                                        </div>
+                                    </a>
+                                </article>
+                            @endforeach
+
                         </div>
-                    @endif
-                </div>
+                    </div>
+                @else
+                    <div style="text-align: center; padding: 80px 0; color: var(--muted-foreground); width: 100%;">
+                        <iconify-icon icon="lucide:package-open" style="font-size: 48px; margin-bottom: 16px;"></iconify-icon>
+                        <p style="font-size: 16px; font-weight: 500;">No products available yet. Check back soon!</p>
+                    </div>
+                @endif
             </div>
         </section>
 
@@ -346,21 +414,67 @@
             }
         @endphp
 
-        <section class="section-padding" style="padding-top: 0">
-            <div class="container featured-row" style="grid-template-columns: repeat({{ count($cats) > 4 ? 4 : count($cats) }}, minmax(0, 1fr));">
-                @foreach($cats as $cat)
-                    <a href="{{ $cat['link'] }}" class="cat-card">
-                        @if($cat['image'])
-                            <img src="{{ asset('storage/'.$cat['image']) }}" alt="{{ $cat['title'] }}">
-                        @else
-                            <div style="position: absolute; inset:0; background-color: var(--secondary);"></div>
-                        @endif
-                        <div class="cat-card-content">
-                            <h3 class="cat-title">{{ $cat['title'] }}</h3>
-                            <span class="cat-link">Shop Collection <iconify-icon icon="lucide:arrow-right"></iconify-icon></span>
-                        </div>
-                    </a>
-                @endforeach
+        <section class="section-padding" style="padding-top: 0; padding-bottom: 60px;">
+            <div class="featured-marquee-wrapper">
+                <div class="featured-marquee-track">
+                    
+                    @foreach($cats as $cat)
+                        <a href="{{ $cat['link'] }}" class="cat-card">
+                            @if($cat['image'])
+                                <img src="{{ asset('storage/'.$cat['image']) }}" alt="{{ $cat['title'] }}">
+                            @else
+                                <div style="position: absolute; inset:0; background-color: var(--secondary);"></div>
+                            @endif
+                            <div class="cat-card-content">
+                                <h3 class="cat-title">{{ $cat['title'] }}</h3>
+                                <span class="cat-link">Shop Collection <iconify-icon icon="lucide:arrow-right"></iconify-icon></span>
+                            </div>
+                        </a>
+                    @endforeach
+
+                    @foreach($cats as $cat)
+                        <a href="{{ $cat['link'] }}" class="cat-card" aria-hidden="true">
+                            @if($cat['image'])
+                                <img src="{{ asset('storage/'.$cat['image']) }}" alt="{{ $cat['title'] }}">
+                            @else
+                                <div style="position: absolute; inset:0; background-color: var(--secondary);"></div>
+                            @endif
+                            <div class="cat-card-content">
+                                <h3 class="cat-title">{{ $cat['title'] }}</h3>
+                                <span class="cat-link">Shop Collection <iconify-icon icon="lucide:arrow-right"></iconify-icon></span>
+                            </div>
+                        </a>
+                    @endforeach
+
+                    @foreach($cats as $cat)
+                        <a href="{{ $cat['link'] }}" class="cat-card" aria-hidden="true">
+                            @if($cat['image'])
+                                <img src="{{ asset('storage/'.$cat['image']) }}" alt="{{ $cat['title'] }}">
+                            @else
+                                <div style="position: absolute; inset:0; background-color: var(--secondary);"></div>
+                            @endif
+                            <div class="cat-card-content">
+                                <h3 class="cat-title">{{ $cat['title'] }}</h3>
+                                <span class="cat-link">Shop Collection <iconify-icon icon="lucide:arrow-right"></iconify-icon></span>
+                            </div>
+                        </a>
+                    @endforeach
+
+                    @foreach($cats as $cat)
+                        <a href="{{ $cat['link'] }}" class="cat-card" aria-hidden="true">
+                            @if($cat['image'])
+                                <img src="{{ asset('storage/'.$cat['image']) }}" alt="{{ $cat['title'] }}">
+                            @else
+                                <div style="position: absolute; inset:0; background-color: var(--secondary);"></div>
+                            @endif
+                            <div class="cat-card-content">
+                                <h3 class="cat-title">{{ $cat['title'] }}</h3>
+                                <span class="cat-link">Shop Collection <iconify-icon icon="lucide:arrow-right"></iconify-icon></span>
+                            </div>
+                        </a>
+                    @endforeach
+
+                </div>
             </div>
         </section>
 
@@ -380,81 +494,67 @@
             </div>
         </section>
 
-        <section class="section-padding">
-            <div class="container">
-                <div class="masonry-section-header">
-                    <div>
-                        <h2 class="heading-lg">{{ $settings['new_arrivals_title'] ?? 'Latest Drops' }}</h2>
-                        <p class="text-muted" style="margin-top: 12px; max-width: 600px">
-                            Curated tees infused with digital ink splatters and high-voltage lightning motifs. Grab them before they fade into the static.
-                        </p>
-                    </div>
-                    <button class="btn btn-outline">View Collection</button>
-                </div>
-
-                <div class="masonry-grid">
-                    <article class="masonry-item">
-                        <div class="masonry-image-wrap">
-                            <img src="https://storage.googleapis.com/banani-generated-images/generated-images/9209bf26-eaac-48d7-a530-5355c6803043.jpg" alt="Thunder Glyph Tee" />
-                            <div class="masonry-cart-btn"><iconify-icon icon="lucide:shopping-cart" style="font-size: 20px; color: var(--primary-foreground)"></iconify-icon></div>
-                        </div>
-                        <div class="masonry-info">
-                            <div class="masonry-text"><div class="masonry-name">Thunder Glyph Tee</div><div class="masonry-price">$45.00</div></div>
-                        </div>
-                    </article>
-
-                    <article class="masonry-item">
-                        <div class="masonry-image-wrap">
-                            <img src="https://storage.googleapis.com/banani-generated-images/generated-images/580e94b4-4285-4625-b6ff-7d95ce1bb630.jpg" alt="Voltage Leap Tee" />
-                            <div class="masonry-cart-btn"><iconify-icon icon="lucide:shopping-cart" style="font-size: 20px; color: var(--primary-foreground)"></iconify-icon></div>
-                        </div>
-                        <div class="masonry-info">
-                            <div class="masonry-text"><div class="masonry-name">Voltage Leap Tee</div><div class="masonry-price">$52.00</div></div>
-                        </div>
-                    </article>
-
-                    <article class="masonry-item">
-                        <div class="masonry-image-wrap">
-                            <img src="https://storage.googleapis.com/banani-generated-images/generated-images/2011c442-1c48-49ae-9e54-c48254fd0843.jpg" alt="Brush Chaos Tee" />
-                            <div class="masonry-cart-btn"><iconify-icon icon="lucide:shopping-cart" style="font-size: 20px; color: var(--primary-foreground)"></iconify-icon></div>
-                        </div>
-                        <div class="masonry-info">
-                            <div class="masonry-text"><div class="masonry-name">Brush Chaos Tee</div><div class="masonry-price">$40.00</div></div>
-                        </div>
-                    </article>
-
-                    <article class="masonry-item">
-                        <div class="masonry-image-wrap">
-                            <img src="https://storage.googleapis.com/banani-generated-images/generated-images/f39be664-98ba-4195-9b7f-e5c395cc0e6d.jpg" alt="Signal Line Tee" />
-                            <div class="masonry-cart-btn"><iconify-icon icon="lucide:shopping-cart" style="font-size: 20px; color: var(--primary-foreground)"></iconify-icon></div>
-                        </div>
-                        <div class="masonry-info">
-                            <div class="masonry-text"><div class="masonry-name">Signal Line Tee</div><div class="masonry-price">$38.00</div></div>
-                        </div>
-                    </article>
-
-                    <article class="masonry-item">
-                        <div class="masonry-image-wrap">
-                            <img src="https://storage.googleapis.com/banani-generated-images/generated-images/43fc10f1-9bea-4109-9163-db7ef97c7741.jpg" alt="Static Stack Pack" />
-                            <div class="masonry-cart-btn"><iconify-icon icon="lucide:shopping-cart" style="font-size: 20px; color: var(--primary-foreground)"></iconify-icon></div>
-                        </div>
-                        <div class="masonry-info">
-                            <div class="masonry-text"><div class="masonry-name">Static Stack Pack</div><div class="masonry-price">$110.00</div></div>
-                        </div>
-                    </article>
-
-                    <article class="masonry-item">
-                        <div class="masonry-image-wrap">
-                            <img src="https://storage.googleapis.com/banani-generated-images/generated-images/8ec35f28-990c-46ed-918f-16703ddc7257.jpg" alt="Neon Rail Tee" />
-                            <div class="masonry-cart-btn"><iconify-icon icon="lucide:shopping-cart" style="font-size: 20px; color: var(--primary-foreground)"></iconify-icon></div>
-                        </div>
-                        <div class="masonry-info">
-                            <div class="masonry-text"><div class="masonry-name">Neon Rail Tee</div><div class="masonry-price">$55.00</div></div>
-                        </div>
-                    </article>
-                </div>
+        <section class="section-padding" style="padding-top: 40px">
+        <div class="container">
+          <div class="masonry-section-header">
+            <div>
+              <h2 class="heading-lg">
+                {{ $settings['new_arrivals_title'] ?? 'Fresh Drops' }}
+              </h2>
+              <p class="text-muted" style="margin-top: 12px; max-width: 600px">
+                {{ $settings['new_arrivals_subtext'] ?? 'Curated tees infused with digital ink splatters and high-voltage lightning motifs. Grab them before they fade into the static.' }}
+              </p>
             </div>
-        </section>
+            <a href="/products" class="btn btn-outline" data-media-type="banani-button">
+              View Collection
+            </a>
+          </div>
+
+          <div class="masonry-grid">
+            @if(isset($products) && $products->count() > 0)
+                @foreach($products->take(6) as $index => $product)
+                    @php
+                        $aspectRatios = ['3/4', '4/5', '1/1', '3/4', '4/5', '3/4'];
+                        $ratio = $aspectRatios[$index % 6];
+                    @endphp
+
+                    <article class="masonry-item" data-media-type="banani-button">
+                        <a href="#" style="display: block; color: inherit; text-decoration: none;">
+                            <div class="masonry-image-wrap">
+                                @if($product->image)
+                                    <img 
+                                        alt="{{ $product->name }}"
+                                        src="{{ asset('storage/' . $product->image) }}" 
+                                        style="aspect-ratio: {{ $ratio }}; object-fit: cover; width: 100%; display: block;" 
+                                    />
+                                @else
+                                    <div style="width: 100%; aspect-ratio: {{ $ratio }}; display: flex; align-items: center; justify-content: center; background: var(--secondary); color: var(--muted-foreground);">
+                                        <iconify-icon icon="lucide:image" style="font-size: 40px; opacity: 0.3;"></iconify-icon>
+                                    </div>
+                                @endif
+                                
+                                <div class="masonry-cart-btn">
+                                    <iconify-icon icon="lucide:shopping-cart" style="font-size: 20px; color: var(--primary-foreground)"></iconify-icon>
+                                </div>
+                            </div>
+                            <div class="masonry-info">
+                                <div class="masonry-text">
+                                    <div class="masonry-name">{{ $product->name }}</div>
+                                    <div class="masonry-price">${{ number_format($product->price, 2) }}</div>
+                                </div>
+                            </div>
+                        </a>
+                    </article>
+                @endforeach
+            @else
+                <div style="grid-column: 1 / -1; text-align: left; padding: 40px 0; color: var(--muted-foreground);">
+                    <iconify-icon icon="lucide:package-open" style="font-size: 40px; margin-bottom: 16px;"></iconify-icon>
+                    <p style="font-size: 16px; font-weight: 500;">No new arrivals yet. Check back soon!</p>
+                </div>
+            @endif
+          </div>
+        </div>
+      </section>
 
         <footer class="footer">
         <div class="container">

@@ -24,7 +24,17 @@ class ProductController extends Controller
         
         return view('welcome', compact('products', 'settings'));
     }
+    // Toggle Trending Status from the list
+    public function toggleTrending(Product $product)
+    {
+        $product->update([
+            'is_trending' => !$product->is_trending // Flips the boolean value
+        ]);
 
+        $status = $product->is_trending ? 'marked as Trending' : 'removed from Trending';
+        
+        return back()->with('success', "Product successfully {$status}!");
+    }
     // Admin Dashboard list
     // Admin Dashboard (Now just for stats)
     public function adminIndex()

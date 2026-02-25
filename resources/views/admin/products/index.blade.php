@@ -64,14 +64,23 @@
                                 @endif
                             </td>
                             <td class="text-end">
+                                <form action="{{ route('admin.products.toggle-trending', $product->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-sm border me-1 {{ $product->is_trending ? 'bg-warning text-dark border-warning' : 'btn-light text-muted' }}" title="{{ $product->is_trending ? 'Remove from Trending' : 'Mark as Trending' }}">
+                                        <iconify-icon icon="lucide:flame" style="font-size: 16px; position: relative; top: 2px;"></iconify-icon>
+                                    </button>
+                                </form>
+
                                 <a href="{{ route('admin.products.edit', $product->id) }}" class="btn btn-sm btn-light border me-1" title="Edit">
-                                    <iconify-icon icon="lucide:edit-2"></iconify-icon>
+                                    <iconify-icon icon="lucide:edit-2" style="font-size: 16px; position: relative; top: 2px;"></iconify-icon>
                                 </a>
+
                                 <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-light border text-danger" onclick="return confirm('Are you sure you want to delete this product?')" title="Delete">
-                                        <iconify-icon icon="lucide:trash-2"></iconify-icon>
+                                        <iconify-icon icon="lucide:trash-2" style="font-size: 16px; position: relative; top: 2px;"></iconify-icon>
                                     </button>
                                 </form>
                             </td>

@@ -24,6 +24,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     // Add these inside your Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () { ... });
     Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('admin.products.edit');
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('admin.products.update');
+    // Add this inside the Route::middleware(['auth', 'admin'])->prefix('admin')->group(...)
+    Route::patch('/products/{product}/toggle-trending', [ProductController::class, 'toggleTrending'])->name('admin.products.toggle-trending');
     
     // Added DELETE route for destroying products
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('admin.products.destroy');
